@@ -1,5 +1,71 @@
-## html了解的head里面包含哪些内容
+## HTML标签里的css、js属性及作用
+### 引入外联CSS样式方式
 
+<link> 标签定义文档与外部资源的关系。最常见的用途是链接样式表。也可以被用来创建站点图标(比如PC端的“favicon”图标和移动设备上用以显示在主屏幕的图标) 。link 元素是空元素，它仅包含属性。此元素只能存在于 head 部分，不过它可出现任何次数。
+
+```css
+/* 第一种 链接方式*/
+<link rel="stylesheet" type="text/css" href="sheet1.css" media="screen and (max-width: 600px)" title="Default" crossorigin="anonymous"/>
+/* 网站图标的链接 */
+<link rel="icon" href="favicon.ico">
+
+/* 第二种 导入方式*/
+<style type="text/css">
+  @import url(styles.css); /* @import comes first */
+  h1 {
+    color: gray;
+  }
+</style>
+```
+
+> ###### 属性及属性值的含义
+>
+> `rel` 代表“关系”，规定当前文档与被链接文档之间的关系。stylesheet关系是指样式表。
+>
+> `type`属性类型总是设置为 text/css。此值描述将使用链接标记加载的数据类型。
+>
+> `href `属性的值是样式表的 URL。这个 URL 可以是绝对的，也可以是相对的。
+>
+> `media`媒体属性。此属性的值是一个或多个媒体描述符，它们是关于媒体类型和这些媒体特性的规则，每个规则由逗号分隔。例如，你可以在屏幕和投影媒体中使用`media="screen, projection"`。
+>
+> `title` 属性的值来生成样式替代列表。
+>
+> `crossorigin`属性表示在加载相关资源时是否必须使用 CORS。`"anonymous"`会发起一个跨域请求(即包含 `Origin:` HTTP 头). 但不会发送任何认证信息。
+>
+> `"use-credentials"`会发起一个带有认证信息的跨域请求 (即包含 `Origin:` HTTP 头). 
+>
+> `sizes` 定义了包含相应资源的可视化媒体中的icons的大小。
+>
+> **`as`**属性仅在`<link>`元素设置了 `rel="preload"` （表示浏览器应该预加载该资源 ）时才能使用。`as`属性表示获取特定的内容类。
+
+###### 页面导入样式时，使用 link 和@import 有什么区别？
+
+- link 属于 HTML，通过 **<link>** 标签中的 href 属性来引入外部文件，而 **@import** 属于 CSS，所以导入语句应写在 CSS 中，要注意的是导入语句应写在样式表的开头，否则无法正确导入外部文件；
+- **@import** 是 CSS2.1 才出现的概念，所以如果浏览器版本较低，无法正确导入外部样式文件；
+- 当 HTML 文件被加载时，link 引用的文件会同时被加载，而 **@import** 引用的文件则会等页面全部下载完毕再被加载；
+
+### 引入js代码方式
+
+<script></script> 元素用于嵌入或引用可执行脚本。这通常用作嵌入或者指向 JavaScript 代码。  
+
+```js
+<script type="text/javascript" async  defer crossorigin="anonymous"src="javascript.js">
+```
+
+> **`src`** 属性定义引用外部脚本的URI，这可以用来代替直接在文档中嵌入脚本。
+>
+> **`type`** 属性定义script元素包含或`src`引用的脚本语言。属性的值为MIME类型; 支持的MIME类型包括`text/javascript`, `text/ecmascript`, `application/javascript`, 和`application/ecmascript`。如果没有定义这个属性，脚本会被视作JavaScript。**如果type属性为`module`，代码会被当作JavaScript模块。**
+>
+> `charset`规定在外部脚本文件中使用的字符编码。
+>
+> **`async`** 属性对于普通脚本，如果存在 `async` 属性，那么普通脚本会被并行请求，并尽快解析和执行。
+>
+> **`crossorigin`**属性可以使那些将静态资源放在另外一个域名的站点打印错误信息。
+>
+> **`defer`**被设定用来通知浏览器该脚本将在文档完成解析后，触发 `DOMContentLoaded` 事件前执行。
+
+
+## html的head包含内容
 ```html
 <head>
     <meta charset="UTF-8">
@@ -100,19 +166,93 @@
 
 > 链接：https://juejin.im/post/6844903800956796941
 
-## script放在 head种和body种的区别
+## `<a></a>`标签全部作用
 
-##### 1、加载的顺序不一样
+```css
+<a href=""></a>
+	href="" //刷新页面
+	href="#"//跳转到当前页面的顶部（不会刷新）
+	href="javascript:void(0)" // 什么都不做
+	href="javascript:;" // 什么都不做
+```
 
-浏览器是从上到下解析HTML的。放在head里的js代码，会在body解析之前被解析；放在body里的js代码，会在整个页面加载完成之后解析。
+## 行内元素和块级元素区别
 
-放在body中：在页面加载的时候被执行
+| 行内元素（内联元素）                                         | 块级元素                                                     | 行内块元素（置换/替换元素）    |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------ |
+| `display:inline;`                                            | `display:block;`                                             | `display:inline-block;`        |
+| `a, b, em, span, select, button, br, label, strong `         | `div，p，h1-h6,  table,  ul,  form,  hr,  article，aside,  header,  video,  dl,  ol` | `input、img`                   |
+| 不能设置高宽，它的**高度取决于内部文字的行高。宽度取决于内部文字的多少** | 可以设置width和height                                        | 同块级元素一致                 |
+| 只能设置margin、padding的left、right元素，不可以设置top，bottom等元素 | 可以设置margin和padding                                      | 同块级元素一致                 |
+| 相邻的行内元素会排在同一行，直到一行排不下才会换行，其宽度随内容变化 | 独占一行，在默认情况下，其宽度会自动填满父级元素宽度         | 允许左右存在元素，不是独占一行 |
 
-放在head中：在被调用时被执行
+通常 **HTML 的层级结构**允许**行内元素作为块级元素的后代**，而不是相反，**CSS 则没有这样的限制，你可以保持现有的标签结构**，然后修改这两个元素的显示角色。
 
-总结：**放入html的head,是页面加载前就运行，放入body中，则加载后才运行javascript的代码**
+```html
+<body>
+  <p>This is a paragraph with <em>an inline element</em> within it.</p>
+</body>
+<style>
+p {
+  display: inline;
+}
+em {
+  display: block;
+}
+</style>
+```
 
-## meta viewport 是做什么用的，怎么写？
+## nodeType值及代表含义
+
+- nodeType == 1 表示的是元素节点（标签）。
+- nodeType == 2 表示是属性节点。
+- nodeType == 3 是文本节点。
+
+获取相应节点的实例：
+
+```html
+<body>
+    <div id="box" value="111">hello</div>
+    <script>
+        var element = document.getElementById("box"); // 获取元素节点（标签）
+        var attributeNode = element.getAttributeNode("id"); //获取box的属性节点
+        var textNode = element.firstChild; // 获取box的文本节点
+        console.log(element); // <div id="box" value="111">hello</div>
+        console.log(attributeNode); // id="box"
+        console.log(textNode); // "hello"
+        // 获取nodeType
+        console.log(element.nodeType); //1
+        console.log(attributeNode.nodeType); //2
+        console.log(textNode.nodeType); //3
+        // 获取nodeName
+        console.log(element.nodeName); //DIV
+        console.log(attributeNode.nodeName); //id
+        console.log(textNode.nodeName); // #text
+        // 获取nodeValue
+        console.log(element.nodeValue); //null
+        console.log(attributeNode.nodeValue); //box
+        console.log(textNode.nodeValue); // hello
+    </script>
+</body>
+```
+
+## html添加注释
+
+html注释：
+
+**注释标签 <!-- 与 --> **
+
+`注释//`
+
+条件注释：
+
+```html
+<!--[if IE 8]>
+    .... some HTML here ....
+<![endif]-->
+```
+
+## meta viewport使用
 
 ```html
  	<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
@@ -120,7 +260,7 @@
 
 控制页面在移动端不要缩小显示。
 
-## Doctype 是什么，有什么作用？标准模式与兼容模式各有什么区别?
+## Doctype 作用及区别
 
 **概念**：`DOCTYPE` 是用来声明文档类型和 DTD （DocType Declaration）规范的。任何一个标准的HTML页面，第一行一定是一个以`<!DOCTYPE ……>`开头的语句。它不是一个 HTML 标签，处于 html 标签之前。**DTD可告知浏览器文档使用哪种 HTML 或 XHTML 规范**。
 
@@ -149,120 +289,18 @@ HTML4.01里面有两大种规范，每大种规范里面又各有3种小规范�
 - XHTML （Extensible Hypertext Markup Language）是可扩展超文本标记语言，属于 XML，是 HTML 进行 XML 严格化的结果。
 - HTML5 不属于SGML，也不属于 XML（HTML5有自己独立的一套规范），比 XHTML 宽松。
 
-## 行内元素有哪些？块级元素有哪些？ 空(void)元素有那些？
-
-**定义**：CSS 规范规定，每个元素都有 display 属性，确定该元素的类型，每个元素都有默认的 display 值，如 div 的 display 默认值为“block”，则为“块级”元素；span 默认 display 属性值为“inline”，是“行内”元素。
-
-- 行内元素有：a b span img input select strong（强调的语气）
-- 块级元素有：div ul ol li dl dt dd h1 h2 h3 h4…p
-- 空元素：
-  - 常见: br hr img input link meta
-  - 不常见: area base col command embed keygen param source track wbr
-
-不同浏览器（版本）、HTML4（5）、CSS2 等实际略有差异 参考: http://stackoverflow.com/questions/6867254/browsers-default-css-for-html-elements
-
 ## HTML 全局属性
 
 全局属性是所有 HTML 元素共有的属性; 它们可以用于所有元素，即使属性可能对某些元素不起作用。
 
 [全局属性 | MDN](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Global_attributes)
 
-## 页面导入样式时，使用 link 和@import 有什么区别？
+##  link 和@import 区别
 
 - link 属于 XHTML 标签，除了加载 CSS 外，还能用于定义 RSS, 定义 rel 连接属性等作用；而@import 是 CSS 提供的，只能用于加载 CSS;
 - 页面被加载的时，link 会同时被加载，而@import 引用的 CSS 会等到页面被加载完再加载;
 - import 是 CSS2.1 提出的，只在 IE5 以上才能被识别，而 link 是 XHTML 标签，无兼容问题;
 - link 支持使用 js 控制 DOM 去改变样式，而@import 不支持;
-
-## HTML5 变化
-
-HTML5 现在已经不是 SGML 的子集，主要是关于图像，位置，存储，多任务等。 
-
-### 新的语义化元素
-
-##### 1、H5中新增的语义标签
-
-- `<section>` 表示区块
-
-- `<article>` 表示文章。如文章、评论、帖子、博客
-
-- `<header>` 表示页眉
-
-- `<footer>` 表示页脚
-
-- `<nav>` 表示导航
-
-- `<aside>` 表示侧边栏。如文章的侧栏
-
-- <figure> 表示媒介内容分组。
-
-- `<mark>` 表示标记 (用得少)
-
-- `<progress>` 表示进度 (用得少)
-
-- `<time>` 表示日期
-
-本质上新语义标签与`<div>`、`<span>`没有区别，只是其具有表意性，使用时除了在HTML结构上需要注意外，其它和普通标签的使用无任何差别，可以理解成`<div class="nav">` 相当于`<nav>`。
-
-##### 2、移除的元素
-
-- 纯表现的元素：basefont，big，center，font, s，strike，tt，u;
-- 对可用性产生负面影响的元素：frame，frameset，noframes；
-
-### 表单增强
-
-- `email` 只能输入email格式。自动带有验证功能。
-- `tel` 手机号码。
-- `url` 只能输入url格式。
-- `number` 只能输入数字。
-- `search` 搜索框
-- `range` 滑动条
-- `color` 拾色器
-- `time` 时间
-- `date` 日期
-- `datetime` 时间日期
-- `month` 月份
-- `week` 星期
-
-上面的部分类型是针对移动设备生效的，且具有一定的兼容性，在实际应用当中可选择性的使用。
-
-### 新 API
-
-- 离线 （applicationCache ）
-
-- 音视频 （audio, vidio）
-
-- 图形 （canvans）
-
-- 实时通信（websoket）
-
-- 本地存储（本地离线存储 localStorage 长期存储数据，浏览器关闭后数据不丢失；sessionStorage 的数据在浏览器关闭后自动删除）
-
-- 设备能力（地图定位，手机摇一摇）
-
-- 支持 HTML5 新标签：
-
-  - IE8/IE7/IE6 支持通过 document.createElement 方法产生的标签，
-
-  - 可以利用这一特性让这些浏览器支持 HTML5 新标签，
-
-  - 浏览器支持新标签后，还需要添加标签默认的样式。
-
-  - 当然也可以直接使用成熟的框架、比如 html5shim;
-
-    ```
-    <!--[if lt IE 9]>
-      <script>
-        src = "http://html5shim.googlecode.com/svn/trunk/html5.js";
-      </script>
-    <![endif]-->
-    ```
-
-- 如何区分 HTML5： DOCTYPE 声明\新增的结构元素\功能元素
-
-## HTML5 的 form 如何关闭自动补全功能？
-
-给不想要提示的 form 或某个 input 设置为 autocomplete=off。
 
 ## 如何实现浏览器内多个标签页之间的通信? (阿里)
 
@@ -281,96 +319,6 @@ localstorge 另一个浏览上下文里被添加、修改或删除时，它都�
 - ActiveX HTMLFile (IE) 、
 - 基于 multipart 编码发送 XHR 、
 - 基于长轮询的 XHR
-
-## HTML5 的离线储存怎么使用，工作原理能不能解释一下？
-
-在用户没有与因特网连接时，可以正常访问站点或应用，在用户与因特网连接时，更新用户机器上的缓存文件。
-
-原理：HTML5 的离线存储是基于一个新建的.appcache 文件的缓存机制(不是存储技术)，通过这个文件上的解析清单离线存储资源，这些资源就会像 cookie 一样被存储了下来。之后当网络在处于离线状态下时，浏览器会通过被离线存储的数据进行页面展示。
-
-#### `cache manifest` 缓存清单文件
-
-缓存清单文件中列出了浏览器应缓存，以供离线访问的资源。推荐使用 `.appcache`作为后缀名，另外还要添加MIME类型。
-
-**缓存清单文件里的内容怎样写：**
-
-（1）顶行写CACHE MANIFEST。
-
-（2）CACHE: 换行 指定我们需要缓存的静态资源，如.css、image、js等。
-
-（3）NETWORK: 换行 指定需要在线访问的资源，可使用通配符（也就是：不需要缓存的、必须在网络下面才能访问的资源）。
-
-（4）FALLBACK: 换行 当被缓存的文件找不到时的备用资源（当访问不到某个资源时，自动由另外一个资源替换）。
-
-格式举例1：
-
-![](http://img.smyhvae.com/20180224_2240.png)
-
-
-格式举例2：
-
-```bash
-CACHE MANIFEST
-
-#要缓存的文件
-CACHE:
-    images/img1.jpg
-    images/img2.jpg
-
-
-#指定必须联网才能访问的文件
-NETWORK:
-     images/img3.jpg
-     images/img4.jpg
-
-
-#当前页面无法访问是回退的页面
-FALLBACK:
-    404.html
-
-```
-
-
-**缓存清单文件怎么用：**
-
-（1）例如我们创建一个名为 `demo.appcache`的文件。例如：
-
-demo.appcache：
-
-```bash
-CACHE MANIFEST
-
-# 注释以#开头
-#下面是要缓存的文件
-CACHE:
-    http://img.smyhvae.com/2016040101.jpg
-```
-
-
-（2）在需要应用缓存在页面的根元素(html)里，添加属性manifest="demo.appcache"。路径要保证正确。例如：
-
-
-```html
-<!DOCTYPE html>
-<html manifest="01.appcache">
-<head lang="en">
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-<img src="http://img.smyhvae.com/2016040101.jpg" alt=""/>
-</body>
-</html>
-```
-
-### 浏览器是怎么对 HTML5 的离线储存资源进行管理和加载的呢？
-
-- 在线的情况下，浏览器发现 html 头部有 manifest 属性，它会请求 manifest 文件，如果是第一次访问 app，那么浏览器就会根据 manifest 文件的内容下载相应的资源并且进行离线存储。如果已经访问过 app 并且资源已经离线存储了，那么浏览器就会使用离线的资源加载页面，然后浏览器会对比新的 manifest 文件与旧的 manifest 文件，如果文件没有发生改变，就不做任何操作，如果文件改变了，那么就会重新下载文件中的资源并进行离线存储。
-- 离线的情况下，浏览器就直接使用离线存储的资源。
-
-在离线状态时，操作 window.applicationCache 进行需求实现。
-
-参考链接：[HTML5 离线缓存-manifest 简介](https://yanhaijing.com/html/2014/12/28/html5-manifest/)
 
 ## title 与 h1 的区别、b 与 strong 的区别、i 与 em 的区别？
 
@@ -402,10 +350,6 @@ strong, em, ins, del, code
 - HTML 只是一个字符串
 - DOM 由 HTML 解析而来
 - JS 可以维护 DOM
-
-## property 和 attribute 的区别
-
-例如一个 input 标签 `<input value="3" />` 它的 attribute 是 3 但如果使用`input.value = 4` 或 直接修改值为 4，这时再去 getAttribute 得到的还是"3"
 
 ## form 作用
 
@@ -498,3 +442,70 @@ label 标签来定义表单控制间的关系,当用户选择该标签时，浏�
 #### 300 毫秒点击延迟问题
 
 在移动端开发中，某些机型上使用 click 事件会延迟 300ms 才执行，这样影响了用户体验。 解决方法： 引入[fastclick.js](https://www.jianshu.com/p/05b142d84780)。
+
+#### innerHTML和innerText的区别
+
+- value：标签的value属性。
+
+- **innerHTML**：双闭合标签里面的内容（包含标签）。
+
+- **innerText**：双闭合标签里面的内容（不包含标签）。（老版本的火狐用textContent）
+
+**区别**：
+
+获取内容：innerHTML会获取到标签本身，而innerText则不会
+
+修改内容：innerHTML会修改标签本身，而innerText则不会
+
+## documen.write 和 innerHTML 的区别
+
+- document.write 只能重绘整个页面
+- innerHTML 可以重绘页面的一部分
+
+## innerHTML 与 outerHTML 的区别？
+
+DOM 元素的 `innerHTML`, `outerHTML`, `innerText`, `outerText` 属性的区别也经常被面试官问到， 比如对于这样一个HTML元素：`<div>content<br/></div>`。
+
+- `innerHTML`：内部HTML，`content<br/>`；
+- `outerHTML`：外部HTML，`<div>content<br/></div>`；
+- `innerText`：内部文本，`content `；
+- `outerText`：内部文本，`content `；
+
+上述四个属性不仅可以读取，还可以赋值。`outerText` 和 `innerText` 的区别在于 `outerText` 赋值时会把标签一起赋值掉，另外 `xxText` 赋值时HTML特殊字符会被转义。
+
+## jQuery的html()与innerHTML的区别？
+
+jQuery的 `.html()` 会调用`.innerHTML`来操作，但是会捕获异常，然后用 `.empty()`, `.append()` 重新操作。 这是因为IE8中有些元素的 `.innerHTML` 是只读的。见：http://stackoverflow.com/questions/3563107/jquery-html-vs-innerhtml
+
+## Window 对象 与 document 对象
+
+##### window
+
+- Window 对象表示当前浏览器的窗口，是 JavaScript 的顶级对象。
+- 我们创建的所有对象、函数、变量都是 Window 对象的成员。
+- Window 对象的方法和属性是在全局范围内有效的。
+
+##### document
+
+- Document 对象是 HTML 文档的根节点与所有其他节点（元素节点，文本节点，属性节点, 注释节点）
+- Document 对象使我们可以通过脚本对 HTML 页面中的所有元素进行访问
+- Document 对象是 Window 对象的一部分，即 window.document
+
+## 客户区坐标、页面坐标、屏幕坐标区别
+
+客户区坐标：**鼠标指针在可视区中**的水平坐标(clientX)和垂直坐标(clientY)
+
+页面坐标：**鼠标指针在页面布局中**的水平坐标(pageX)和垂直坐标(pageY)
+
+屏幕坐标：**设备物理屏幕的**水平坐标(screenX)和垂直坐标(screenY)
+
+## mouseover/mouseout 与 mouseenter/mouseleave 的区别与联系
+
+1. mouseover/mouseout 是标准事件，**所有浏览器都支持**；mouseenter/mouseleave 是 IE5.5 引入的特有事件后来被 DOM3 标准采纳，现代标准浏览器也支持
+2. mouseover/mouseout 是**冒泡**事件；mouseenter/mouseleave**不冒泡**。需要为**多个元素监听鼠标移入/出事件时，推荐 mouseover/mouseout 托管，提高性能**
+3. 标准事件模型中 event.target 表示发生移入/出的元素,**vent.relatedTarget**对应移出/如元素；在老 IE 中 event.srcElement 表示发生移入/出的元素，**event.toElement**表示移出的目标元素，**event.fromElement**表示移入时的来源元素
+
+## focus/blur 与 focusin/focusout 的区别与联系
+
+1. focus/blur 不冒泡，focusin/focusout 冒泡
+2. focus/blur 兼容性好，focusin/focusout 在除 FireFox 外的浏览器下都保持良好兼容性，如需使用事件托管，可考虑在 FireFox 下使用事件捕获 elem.addEventListener('focus', handler, true)
