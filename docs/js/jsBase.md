@@ -54,9 +54,18 @@ JavaScript是在**创建变量（对象，字符串等）时自动进行了分�
 
 注意：内置对象 Function、Array、Date、RegExp、Error等都是属于 Object 类型。也就是说，除了那五种基本数据类型之外，其他的，都称之为 Object类型。
 
-### 基本数据类型
+## 栈内存和堆内存
 
-### 引用数据类型
+JS中，所有的**变量**都是保存在**栈内存**中的。
+
+##### **基本数据类型**：
+
+基本数据类型的值，直接保存在栈内存中。值与值之间是独立存在，修改一个变量不会影响其他的变量。
+
+##### **引用数据类型**：
+
+
+对象是保存到**堆内存**中的。每创建一个新的对象，就会在堆内存中开辟出一个新的空间；而**变量保存了对象的内存地址**（对象的引用），保存在栈内存当中。**如果两个变量保存了同一个对象的引用，当一个通过一个变量修改属性时，另一个也会受到影响。**
 
 ## 基本和引用数据类型的区别（2）
 
@@ -77,7 +86,47 @@ JavaScript是在**创建变量（对象，字符串等）时自动进行了分�
 >
 > 从一个变量向另一个变量复制引用类型的值，复制的其实是指针，因此两个变量最终都指向同一个对象；
 
+#### 示例
+
+**基本数据类型举例**：（传值）
+
+```javascript
+var a = 23;
+var b = a;
+a++;
+console.log(a); // 打印结果：24
+console.log(b); // 打印结果：23
+```
+
+上面的代码中：a 和 b 都是基本数据类型，让 b 等于 a，然后**改变 a 的值之后，发现 b 的值并没有被改变**。
+
+**引用数据类型举例**：（传址）
+
+```javascript
+var obj1 = new Object();
+obj1.name = 'cyh';
+// 将 obj1 的地址赋值给 obj2。从此， obj1 和 obj2 指向了同一个堆内存空间
+var obj2 = zl;
+// 修改 obj1 的 name 属性
+obj1.name = 'vae';
+console.log(obj1.name); // 打印结果：zl
+console.log(obj2.name); // 打印结果：zl
+```
+
+上面的代码中：obj1 和 obj2 都是引用数据类型，让 obj2 等于 obj1，然后**修改 obj1.name 的值之后，发现 obj2.name 的值也发生了改变**。
+
+对于引用类型的数据，赋值相当于地址拷贝，a、b指向了同一个堆内存地址。所以改了b，a也会变；本质上a、b就是一个东西。
+
+如果你打算把引用类型 A 的值赋值给 B，让A和B相互不受影响的话，**可以通过 Object.assign() (浅拷贝)来复制对象**。效果如下：
+
+```js
+var obj1 = {name: 'cyh'};
+// 复制对象：把 obj1 赋值给 obj3。两者之间互不影响
+var obj3 = Object.assign({}, obj1);
+```
+
 ## JavaScript数据类型判断
+
 > `typeof` 和 `Object.prototype.toString().call()`。确定一个值是哪种基本类型可以使用` typeof`操作符，而确定一个值是哪种引用类型可以使用`instanceof `操作符。
 
 ### 1、typeof
@@ -331,6 +380,25 @@ console.log(p.__proto__ === Person.prototype); //true
 	console.log(isArray([])); // true
 ```
 
+## valueOf()与toString()方法及其作用
+
+各种引用对象都继承或最终继承于Object，使用着Object的原型，所以它们不管何时都有 toString() 和 valueOf() 方法，valueOf和toString是Object.prototype的方法。一般很少直接调用，但是在使用对象参与运算的时候就会调用这两个方法了。只不过有些类型的原型重写了这两个方法，比如 Function 实例的原型就重写了 toString() 方法，按照原型链的规则，如果方法和属性在原型链的各原型中有重名，则优先使用最近的方法和属性。
+
+- valueOf: 返回对象的原始值表示
+- toString: 返回对象的字符串表示
+
+###### 常见的引用类型：
+
+- Function 重写了 toString()
+- Date 重写了 toString() 也重写了 valueOf()
+- Array 重写了 toString()
+
+> https://blog.csdn.net/weixin_42476799/article/details/89330017
+
+## == 和 ===的区别
+
+===要求数据类型相同， ==会进行隐式类型转换
+
 ##  作用域和作用域链、执行期上下文
 
 #### 作用域（Scope）
@@ -520,7 +588,53 @@ function fn() {
 fn(); // 打印：20
 ```
 
+## JavaScript的内置对象
 
+| 内置对象  | 对象说明       |
+| :-------- | :------------- |
+| Arguments | 函数参数集合   |
+| Array     | 数组           |
+| Boolean   | 布尔对象       |
+| Math      | 数学对象       |
+| Date      | 日期时间       |
+| Error     | 异常对象       |
+| Function  | 函数构造器     |
+| Number    | 数值对象       |
+| Object    | 基础对象       |
+| RegExp    | 正则表达式对象 |
+| String    | 字符串对象     |
+
+## 内置对象 Math 的常见方法
+
+Math属于一个工具类，里面封装了数学运算相关的属性和方法。如下：
+
+| 方法              | 描述                                       | 备注              |
+| :---------------- | :----------------------------------------- | :---------------- |
+| Math.PI           | 圆周率                                     | Math对象的属性    |
+| Math.abs()        | **返回绝对值**                             |                   |
+| Math.random()     | 生成0-1之间的**随机浮点数**                | 取值范围是 [0，1) |
+| Math.floor()      | **向下取整**（往小取值）                   |                   |
+| Math.ceil()       | **向上取整**（往大取值）                   |                   |
+| Math.round()      | 四舍五入取整（正数四舍五入，负数五舍六入） |                   |
+| Math.max(x, y, z) | 返回多个数中的最大值                       |                   |
+| Math.min(x, y, z) | 返回多个数中的最小值                       |                   |
+| Math.pow(x,y)     | 乘方：返回 x 的 y 次幂                     |                   |
+| Math.sqrt()       | 开方：对一个数进行开方运算                 |                   |
+
+## 日期Date
+
+Date对象 有如下方法，可以获取日期和时间的**指定部分**：
+
+| 方法名            | 含义              | 备注                 |
+| ----------------- | ----------------- | -------------------- |
+| getFullYear()     | 获取年份          |                      |
+| getMonth()        | **获取月： 0-11** | 0代表一月            |
+| getDate()         | **获取日：1-31**  | 获取的是几号         |
+| getDay()          | **获取星期：0-6** | 0代表周日，1代表周一 |
+| getHours()        | 获取小时：0-23    |                      |
+| getMinutes()      | 获取分钟：0-59    |                      |
+| getSeconds()      | 获取秒：0-59      |                      |
+| getMilliseconds() | 获取毫秒          | 1s = 1000ms          |
 
 ## undefined与null的区别
 
@@ -938,28 +1052,99 @@ function f() { console.log('I am outside!'); }
 }());
 ```
 
-
-
 ## JavaScript事件
 
-## JavaScript垃圾收集及内存泄漏
+
+
+## JavaScript垃圾收集
+
+#### Javascript 垃圾回收方法
+
+##### 标记清除（mark and sweep）
+
+- 这是 JavaScript 最常见的垃圾回收方式，当变量进入执行环境的时候，比如函数中声明一个变量，垃圾回收器将其标记为“进入环境”，当变量离开环境的时候（函数执行结束）将其标记为“离开环境”
+- **垃圾回收器会在运行的时候给存储在内存中的所有变量加上标记，然后去掉环境中的变量以及被环境中变量所引用的变量（闭包）**，在这些完成之后仍存在标记的就是要删除的变量了
+
+##### 引用计数(reference counting)
+
+- 在低版本 IE 中经常会出现内存泄露，很多时候就是因为其采用引用计数方式进行垃圾回收。**引用计数的策略是跟踪记录每个值被使用的次数，当声明了一个变量并将一个引用类型赋值给该变量的时候这个值的引用次数就加 1，如果该变量的值变成了另外一个，则这个值得引用次数减 1**，当这个值的引用次数变为 0 的时 候，说明没有变量在使用，这个值没法被访问了，因此可以将其占用的空间回收，这样垃圾回收器会在运行的时候清理掉引用次数为 0 的值占用的空间。
+
+#### 如何判断回收内容
+
+如何确定哪些内存需要回收，哪些内存不需要回收，这是垃圾回收期需要解决的最基本问题。我们可以这样假定，**一个对象为活对象当且仅当它被一个根对象 或另一个活对象指向**。根对象永远是活对象，它是被浏览器或 V8 所引用的对象。被局部变量所指向的对象也属于根对象，因为它们所在的作用域对象被视为根对 象。全局对象（Node 中为 global，浏览器中为 window）自然是根对象。浏览器中的 DOM 元素也属于根对象。
+
+#### V8 回收策略
+
+新生代的对象为存活时间较短的对象，老生代中的对象为存活时间较长或常驻内存的对象。分别对新生代和老生代使用 不同的垃圾回收算法来提升垃圾回收的效率。对象起初都会被分配到新生代，当新生代中的对象满足某些条件（后面会有介绍）时，会被移动到老生代（晋升）。
+
+#### 新生代算法
+
+在新生代空间中，内存空间分为两部分，分别为 From 空间和 To 空间。在这两个空间中，必定有一个空间是使用的，另一个空间是空闲的。新分配的对象会被放入 From 空间中，当 From 空间被占满时，新生代 GC 就会启动了。算法会检查 From 空间中存活的对象并复制到 To 空间中，如果有失活的对象就会销毁。当复制完成后将 From 空间和 To 空间互换，这样 GC 就结束了。 [![img](https://github.com/huyaocode/webKnowledge/raw/master/img/gc-new.png)](https://github.com/huyaocode/webKnowledge/blob/master/img/gc-new.png)
+
+#### 老生代算法
+
+老生代中的对象一般存活时间较长且数量也多，使用了两个算法，分别是标记清除算法和标记压缩算法。
+
+在讲算法前，先来说下什么情况下对象会出现在老生代空间中：
+
+1. 新生代中的对象是否已经经历过一次 Scavenge 算法，如果经历过的话，会将对象从新生代空间移到老生代空间中。
+2. To 空间的对象占比大小超过 25 %。在这种情况下，为了不影响到内存分配，会将对象从新生代空间移到老生代空间中。
+
+## 内存泄漏及优化
+
+#### 什么是内存泄露
+
+存泄露是指程序中已分配的堆内存由于某种原因未释放或者无法释放，造成系统内存的浪费，导致程序运行速度减慢甚至系统奔溃等后果。
+
+#### 常见的内存泄露的场景
+
+- 缓存
+- 作用域未释放（闭包）
+- 没有必要的全局变量
+- 无效的 DOM 引用
+- 定时器未清除
+- 事件监听为空白
+
+#### 内存泄露优化
+
+1. 在业务不需要的用到的内部函数，可以重构到函数外，实现解除闭包。
+2. 避免创建过多的生命周期较长的对象，或者将对象分解成多个子对象。
+3. 避免过多使用闭包。
+4. 注意清除定时器和事件监听器。
+5. nodejs 中使用 stream 或 buffer 来操作大文件，不会受 nodejs 内存限制。
 
 ## this及其指向
+
+#### this 的指向
+
+this 代表函数调用相关联的对象，通常也称为**执行上下文**。
+
+1. 作为**函数直接调用**，非严格模式下，**this 指向 window**，严格模式下，this 指向 undefined；
+2. 作为**某对象的方法调用**，this 通常**指向调用的对象**。
+3. 使用 **apply、call、bind 可以绑定 this 的指向**。
+4. 在**构造函数**中，this 指向**新创建的对象**
+5. 箭头函数没有单独的 this 值，this 在箭头函数创建时确定，它与声明所在的上下文相同。
+
+#### 多个 this 规则出现时，this 最终指向
+
+首先，new 的方式优先级最高，接下来是 bind 这些函数，然后是 obj.foo() 这种调用方式，最后是 foo 这种调用方式，同时，箭头函数的 this 一旦被绑定，就不会再被任何方式所改变。
+
+![this](https://tva1.sinaimg.cn/large/007S8ZIlly1gi3zdwjugtj30ko0erdfu.jpg)
 
 ## 原型对象和原型链 
 ### 原型对象
 
-1、js的所有对象都包含了一个`__proto__`内部属性。这个属性所对应的就是该对象的原型。
-
-2、js的函数对象除了上面的属性外，还包含了prototype属性，但是实例不包含prototype属性。
-
-3、当函数对象作为构造函数创建实例时，该prptotype属性值将被作为实例对象的原型`__prpto__`。
+- JavaScript 的**所有对象**中都包含了一个 `__proto__` 内部属性，这个属性所对应的就是该对象的原型
+- JavaScript 的**函数对象**，除了原型 `__proto__` 之外，还预置了 prototype 属性
+- 当函数对象作为**构造函数创建实例**时，该 prototype 属性值将被作为实例对象的原型 `__proto__`。
 
 ```js
 function Person() {}
 var person = new Person();
 Person.prototype = person.__proto__;
 ```
+
+![原型](https://tva1.sinaimg.cn/large/007S8ZIlly1gi6an8k50pj30ki07xjso.jpg)
 
 ### 原型链
 
@@ -978,7 +1163,7 @@ Object是原型链的顶端。
 
 **原型链的关键**：在访问一个实例的时候，如果实例本身没找到此方法或属性，就往原型上找。如果还是找不到，继续往上一级的原型上找。
 
-> 函数才有 prototype，实例对象只有有**proto**， 而函数有的**proto**是因为函数是 Function 的实例对象
+> 函数才有 prototype，实例对象只有**`__proto__`**， 而函数有的**`__proto__`**是因为函数是 Function 的实例对象
 
 ### 原型、构造函数、实例的关系
 
@@ -1003,6 +1188,10 @@ Foo.prototype.constructor === Foo;  // true
 声明：所有的**引用类型**（数组、对象、函数）都有`__proto__`这个属性。
 
 `Foo.__proto__ === Function.prototype`的结果为true，说明Foo这个普通的函数，是Function构造函数的一个实例。
+
+## prototype与__proto__的关系与区别
+
+函数才有 prototype，实例对象只有**proto**， 而函数有的**proto**是因为函数是 Function 的实例对象
 
 ## 面向对象的程序设计
 
@@ -2460,3 +2649,16 @@ console.log('arr =' + JSON.stringify(arr));
 console.log('result =' + JSON.stringify(result));
 ```
 
+## offset、client与scroll的区别
+
+###### offsetWidth/offsetHeight,clientWidth/clientHeight 与 scrollWidth/scrollHeight 的区别
+
+`HTMLElement.offsetWidth` 是一个只读属性，返回一个元素的布局宽度。一个典型的（译者注：各浏览器的offsetWidth可能有所不同）offsetWidth是测量包含元素的边框(border)、水平线上的内边距(padding)、竖直方向滚动条(scrollbar)（如果存在的话）、以及CSS设置的宽度(width)的值。
+
+clientWidth = 内部宽度+内边距 （不包括垂直滚动条+边框+外边距）
+
+offsetWidth = 内部宽度 + 边框 + 内边距 + 滚动条
+
+- offsetWidth/offsetHeight 返回值包含 content + padding + border，效果与 e.getBoundingClientRect()相同
+- clientWidth/clientHeight 返回值只包含 content + padding，如果有滚动条，也不包含滚动条
+- scrollWidth/scrollHeight 返回值包含 content + padding + 溢出内容的尺寸

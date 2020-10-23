@@ -1,3 +1,29 @@
+## Webpack学习
+
+Webpack是什么？
+
+是一种前端资源构建工具，一个静态模块打包器（model bundler）。在Webpack看来，前端所有的资源文件（js/json/css/less/img...）都会作为模块处理。它将根据模块的依赖关系进行静态分析，打包生成对应的静态资源（bundle）。
+
+```js
+npm init
+npm i jquery
+npm i webpack webpack-cli -g
+npm i webpack webpack-cli -D
+```
+
+![image-20201002095156309](https://tva1.sinaimg.cn/large/007S8ZIlly1gjar3b4kanj31780u07fu.jpg)
+
+首先入口文件为index.js，在文件中通过js、less、css等引入文件进行编译成chunk块，然后将less转化成css等进行打包，最后bundle
+
+## Webpack五个核心概念
+
+- entry：入口。webpack是基于模块的，使用webpack首先需要指定模块解析入口(entry)，webpack从入口开始根据模块间依赖关系递归解析和处理所有资源文件。
+- output：输出。源代码经过webpack处理之后的最终产物。
+- loader：模块转换器。本质就是一个函数，在该函数中对接收到的内容进行转换，返回转换后的结果。因为 Webpack 只认识 JavaScript，所以 Loader 就成了翻译官，对其他类型的资源进行转译的预处理工作。
+- plugin：扩展插件。基于事件流框架 `Tapable`，插件可以扩展 Webpack 的功能，在 Webpack 运行的生命周期中会广播出许多事件，Plugin 可以监听这些事件，在合适的时机通过 Webpack 提供的 API 改变输出结果。
+- module：模块。除了js范畴内的es module、commonJs、AMD等，css @import、url(...)、图片、字体等在webpack中都被视为模块。
+
+
 ## package.json、package-lock.json区别
 
 package.json是通过npm init创建时生成的，package.json文件中会记录项目中所需要的模块。记录的只是每个模块的基本信息。模块名称和大版本信息。

@@ -118,10 +118,75 @@ window.a // 1
 let b = 1; 
 window.b // undefined
 ```
-
+## 模板字符串
+* 基本的字符串格式化。将表达式嵌入字符串中进行拼接。用${}来界定。
+* 通过反引号(``)做多行字符串或者单行字符串的拼接。
 
 
 ## 变量的解构赋值
+
+## 箭头函数
+- 不需要function关键字来创建函数
+- 省略return关键字
+- 继承当前上下文的 this 关键字
+- 普通 function 的声明在变量提升中是最高的，**箭头函数没有函数提升**
+- 箭头函数**没有属于自己的`this`，`arguments`**
+- 箭头函数**不能作为构造函数，不能被 new，没有 property**
+- 不可以使用 yield 命令，因此箭头函数**不能用作 Generator 函数**
+- 不可以使用 new 命令，因为：
+  - 没有自己的 this，**无法调用 call，apply**
+  - 没有 prototype 属性 ，而 new 命令在执行时需要将构造函数的 prototype 赋值给新的对象的 `__proto__`
+
+
+## 扩展运算符
+
+组装对象或者数组
+
+```js
+//数组
+const color = ['red', 'yellow']
+const colorful = [...color, 'green', 'pink']
+console.log(colorful) //[red, yellow, green, pink]
+    
+//对象
+const alp = { fist: 'a', second: 'b'}
+const alphabets = { ...alp, third: 'c' }
+console.log(alphabets) //{ "fist": "a", "second": "b", "third": "c"}
+```
+
+获取数组或者对象除了前几项或者除了某几项的其他项
+
+```js
+//数组
+const number = [1,2,3,4,5]
+const [first, ...rest] = number
+console.log(rest) //2,3,4,5
+//对象
+const user = {
+  username: 'lux',
+  gender: 'female',
+  age: 19,
+  address: 'peking'
+}
+const { username, ...rest } = user
+console.log(rest) //{"address": "peking", "age": 19, "gender": "female"}
+```
+
+对于 Object 而言，还可以用于组合成新的 Object 。(ES2017 stage-2 proposal) 当然如果有重复的属性名，右边覆盖左边
+
+```js
+const first = {
+  a: 1,
+  b: 2,
+  c: 6,
+}
+const second = {
+  c: 3,
+  d: 4
+}
+const total = { ...first, ...second }
+console.log(total) // { a: 1, b: 2, c: 3, d: 4 }
+```
 
 ## Symbol
 
@@ -513,6 +578,62 @@ for (let [key, value] of map) {
 * 无法取消 Promise ，一旦新建它就会立即执行，无法中途取消。
 * 如果不设置回调函数， Promise 内部抛出的错误，不会反应到外部。
 * 当处于 Pending 状态时，无法得知目前进展到哪一个阶段（刚刚开始还是即将完成）。
+
+### Promise.all
+
+ `Promise.all(promiseArray) `方法是 Promise 对象上的静态方法，该方法的作用是将多个 Promise 对象实例包装，生成并返回一个新的 Promise 实例。
+
+##### Promise.all特点
+
+* 接收一个Promise实例的数组或具有Iterator接口的对象
+* 如果全部成功，状态变为 resolved，返回值将组成一个数组传给回调
+* 只要有一个失败，状态就变为 rejected，返回值将直接传递给回调 all() 的返回值也是新的 Promise 对象
+* 如果元素不是 Promise 对象，则使用 Promise.resolve 转成 Promise 对象
+
+```js
+var p1 = Promise.resolve(1);
+p2 = Promise.reject(2);
+p3 = Promise.resolve(3);
+Promise.all([p1, p2, p3]).then(function(results) {
+  console.log(results);
+}).catch(function(e) {
+  console.log(e); 
+})
+// 打印： 2  then方法没有执行，catch方法执行
+```
+
+promise 数组中所有的 promise 实例都变为 resolve 的时候，then方法才会返回，并将所有结果传递 results 数组中。promise 数组中任何一个 promise 为 reject 的话，则整个 Promise.all 调用会立即终止，执行catch方法，并返回一个 reject 的新的 promise 对象。
+
+##### 实现Promise.all方法
+
+```js
+function promiseAll(promiseArray) {
+  return new Promise(function(resolve, reject) {
+    // 判断传入的是否是数组
+    if (isArray(promiseArray)) {
+      return reject(new Error("Promise must be an array"));
+    }
+    var resolveCount = 0;
+    var promiseNum = promiseArray.length;
+    var resolveValue = [];
+    for (let i = 0; i < promiseNum; i++) {
+      Promise.resolve(promiseArray[i]).then(
+        (value) => {
+          resolveValue[i] = value;
+          resolveCount++;
+          if (resolveCount === promiseNum) {
+            return resolveValue;
+          }
+        },
+        (reason) => {
+          return reject(reason);
+        }
+      );
+    }
+  });
+}
+```
+
 
 
 ## **Babel**转码器 

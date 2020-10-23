@@ -900,3 +900,7 @@ margin-left: 1000px;
 ## property 和 attribute 的区别
 
 例如一个 input 标签 `<input value="3" />` 它的 attribute 是 3 但如果使用`input.value = 4` 或 直接修改值为 4，这时再去 getAttribute 得到的还是"3"
+
+## css3动画
+> transition和animation的区别，animation的属性
+
