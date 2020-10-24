@@ -1,5 +1,6 @@
-<img width="180px" style="border-radius: 50%" bor src="http://upload.mobiletrain.org/2020/0215/1581742334217.png">
+<!-- <img width="180px" style="border-radius: 50%" bor src="http://upload.mobiletrain.org/2020/0215/1581742334217.png"> -->
 
+![logo](logo.png)
 # 前端技术学习指南
 > A magical documentation site generator.
 
@@ -8,4 +9,4 @@
 <!-- [![stars](https://badgen.net/github/stars/Q-Angelo/Nodejs-Roadmap?icon=github&color=4ab8a1)](https://github.com/Q-Angelo/Nodejs-Roadmap) [![forks](https://badgen.net/github/forks/Q-Angelo/Nodejs-Roadmap?icon=github&color=4ab8a1)](https://github.com/Q-Angelo/Nodejs-Roadmap) -->
 
 [GitHub](https://github.com/cyh756085049/web-book)
-[开始阅读](Home)
+[开始阅读](README)

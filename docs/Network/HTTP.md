@@ -1,5 +1,7 @@
 ## 浏览器输入 url 发生了什么？
 
+![image-20201023214615415](https://tva1.sinaimg.cn/large/0081Kckwly1gjzluotrluj31kb0u00yw.jpg)
+
 （细说，包括每一层涉及到的协议）
 
 > 1. 浏览器查询缓存（强缓存、协商缓存）
