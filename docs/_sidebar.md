@@ -1,7 +1,7 @@
 * [HTML](html/) 
     * [HTML 基础知识](html/HTML)
     * [HTML5 变化](html/HTML5)
-    * [HTML 常见案例](html/)
+    <!-- * [HTML 常见案例](html/) -->
 
 * [CSS](css/) 
     * [CSS 基础知识](css/cssBase)

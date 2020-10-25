@@ -579,6 +579,32 @@ for (let [key, value] of map) {
 * 如果不设置回调函数， Promise 内部抛出的错误，不会反应到外部。
 * 当处于 Pending 状态时，无法得知目前进展到哪一个阶段（刚刚开始还是即将完成）。
 
+##### Promise对象实现的Ajax操作的例子
+```js
+var getJSON = function(url) {
+  var promise = new Promise(function(resolve, reject) {
+    var client = new XMLHttpRequest();
+    clinet.open("GET", url);
+    clinet.onreadystatechange = handler;
+    client.responseType = "json";
+    client.setRequestHeader("Accept", "application/json");
+    client.send();
+
+    function handler() {
+      if (this.readyState !== 4) {
+        return;
+      }
+      if (this.status === 200) {
+        resolve(this.response);
+      } else {
+        reject(new Error(this.statusText));
+      }
+    }
+  });
+  return promise;
+}
+```
+
 ### Promise.all
 
  `Promise.all(promiseArray) `方法是 Promise 对象上的静态方法，该方法的作用是将多个 Promise 对象实例包装，生成并返回一个新的 Promise 实例。
