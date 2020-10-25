@@ -579,34 +579,7 @@ for (let [key, value] of map) {
 * 如果不设置回调函数， Promise 内部抛出的错误，不会反应到外部。
 * 当处于 Pending 状态时，无法得知目前进展到哪一个阶段（刚刚开始还是即将完成）。
 
-### Promise的基本用法
-
-* `Promise`对象是一个构造函数，可以生成Promise实例，其参数是一个函数，该函数有两个参数为`resolve`和`reject`，这两个参数都是函数，由JavaScript引擎提供，不用自己部署。在执行异步操作时调用，并将其结果作为参数传递出去。
-
-* Promise实例生成后，可以使用`then`方法接受`Resolved`和`Reject`状态的回调函数作为参数。其中，`Reject`函数是可选的，两个函数都接受Promise对象传出的值作为参数。（`then`方法指定的回调函数，将在当前脚本所有同步任务执行完才会执行）。
-* `resolve` 函数的参数除了正常的值以外，还可能是另一个`Promise`实例，表示异步操作的结果有可能是一个值，也有可能是另一个异步操作。
-
-*  then 方法是定义在原型对象 Promise.prototype上的。它的作用是为Promise实例添加状态改变时的回调函数，可以采用链式写法。
-* Promise.prototype.catch 方法是 .then(null, rejection) 的别名，用于指定发生错误时的回调函数。如果 catch 方法返回的还是一个Promise对象，则后面还可以接着调用 then 方法。 如果没有报错，则会跳过 catch 方法。 catch 方法之中，还能再抛出错误，如果catch 方法抛出一个错误，而后面没有别的 catch 方法了，这个错误将不会被捕获，也不会传递到外层。如果其后边再加入一个catch方法，则可以捕获前一个 catch 方法抛出的异常。
-
-```js
-var promise = new Promise(function(resolve, reject) { 
-  // ... some code 
-  if (/* 异步操作成功 */){ 
-      resolve(value); 
-	} else { 
-      reject(error); 
-	} 
-});
-promise.then(function(value) {
-  // success
-}， function(error) {
-  // failure
-})
-```
-
 ##### Promise对象实现的Ajax操作的例子
-
 ```js
 var getJSON = function(url) {
   var promise = new Promise(function(resolve, reject) {
@@ -629,34 +602,31 @@ var getJSON = function(url) {
     }
   });
   return promise;
-};
-getJSON("/post.json").then(function(json) {
-  console.log('Contents:' + json);
-}, function(error) {
-  console.log('出错了', error);
-})
+}
+
 ```
 
 ### Promise.all
 
- `Promise.all(promiseArray) `方法是将多个 Promise 对象实例包装，生成并返回一个新的 Promise 实例。
+ `Promise.all(promiseArray) `方法是 Promise 对象上的静态方法，该方法的作用是将多个 Promise 对象实例包装，生成并返回一个新的 Promise 实例。
 
 ##### Promise.all特点
 
-* 接收一个Promise对象的实例的数组或具有Iterator接口的对象，且返回的每个成员都是Promise实例。如果元素不是 Promise 对象的实例，则使用 Promise.resolve 方法将参数转成 Promise 实例，再进一步处理。
-* 如果全部成功，状态变为 resolved（ fulfilled），返回值将组成一个数组传给回调函数。
-* 只要有一个失败，状态就变为 rejected，第一个被 reject 的实例的返回值，会传递给 新的Promise实例的回调函数。
+* 接收一个Promise实例的数组或具有Iterator接口的对象
+* 如果全部成功，状态变为 resolved，返回值将组成一个数组传给回调
+* 只要有一个失败，状态就变为 rejected，返回值将直接传递给回调 all() 的返回值也是新的 Promise 对象
+* 如果元素不是 Promise 对象，则使用 Promise.resolve 转成 Promise 对象
 
 ```js
-var p1 = Promise.resolve(1),
-p2 = Promise.reject(2),
+var p1 = Promise.resolve(1);
+p2 = Promise.reject(2);
 p3 = Promise.resolve(3);
 Promise.all([p1, p2, p3]).then(function(results) {
   console.log(results);
 }).catch(function(e) {
   console.log(e); 
 })
-// 打印： 2  // then方法没有执行，catch方法执行
+// 打印： 2  then方法没有执行，catch方法执行
 ```
 
 promise 数组中所有的 promise 实例都变为 resolve 的时候，then方法才会返回，并将所有结果传递 results 数组中。promise 数组中任何一个 promise 为 reject 的话，则整个 Promise.all 调用会立即终止，执行catch方法，并返回一个 reject 的新的 promise 对象。
