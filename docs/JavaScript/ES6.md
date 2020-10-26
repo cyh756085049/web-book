@@ -637,6 +637,34 @@ getJSON("/post.json").then(function(json) {
 })
 ```
 
+#### Promise.resolve()
+
+作用：将现有的对象转为Promise对象。
+
+Promise.resolve 方法的参数分成四种情况。 
+
+（**1**）参数是一个**Promise**实例 
+
+如果参数是Promise实例，那么 Promise.resolve 将不做任何修改、原封不动地 
+
+返回这个实例。 
+
+（**2**）参数是一个 **thenable** 对象 
+
+thenable 对象指的是具有 then 方法的对象，Promise.resolve 方法会将这个对象转为Promise对象，然后就立即执行 thenable 对象的 then 方法。 
+
+（**3**）参数不是具有 **then** 方法的对象，或根本就不是对象 
+
+如果参数是一个原始值，或者是一个不具有 then 方法的对象，则 Promise.resolve 方法返回一个新的Promise对象，状态为 Resolved 。
+
+（**4**）不带有任何参数 
+
+Promise.resolve 方法允许调用时不带参数，直接返回一个 Resolved 状态的Promise对象。 
+
+#### **Promise.reject()** 
+
+Promise.reject(reason) 方法也会返回一个新的Promise实例，该实例的状态为rejected 。它的参数用法与 Promise.resolve 方法完全一致。 
+
 ### Promise.all
 
  `Promise.all(promiseArray) `方法是将多个 Promise 对象实例包装，生成并返回一个新的 Promise 实例。
@@ -691,7 +719,82 @@ function promiseAll(promiseArray) {
 }
 ```
 
+### Promise.race()
 
+* Promise.race 方法同样是将多个Promise实例，包装成一个新的Promise实例。`var p = Promise.race([p1,p2,p3]); `只要 p1 、 p2 、 p3 之中有一个实例率先改变状态， p 的状态就跟着改变。那个率先改变的Promise实例的返回值，就传递给 p 的回调函数。 
+
+* Promise.race()方法的参数同Promise.all方法一样。
+
+```js
+var p = Promise.race([ 
+  fetch('/resource-that-may-take-a-while'), 
+  new Promise(function (resolve, reject) { 
+    setTimeout(() => reject(new Error('request timeout')), 5000) 
+  }) 
+])
+p.then(response => console.log(response)) 
+p.catch(error => console.log(error))
+// 如果5秒之内 fetch 方法无法返回结果，变量 p 的状态就会变 为 rejected ，从而触发 catch 方法指定的回调函数
+```
+
+### 附加方法
+
+**done()** 
+
+Promise对象的回调链，不管以 then 方法或 catch 方法结尾，要是最后一个方法抛出错误，都有可能无法捕捉到（因为Promise内部的错误不会冒泡到全局）。 因此，我们可以提供一个 **done 方法**，**总是处于回调链的尾端，保证抛出任何可能出现的错误。** 
+
+```js
+// 示例
+asyncFunc() .then(f1) .catch(r1) .then(f2) .done();
+// 实现
+Promise.prototype.done = function (onFulfilled, onRejected) { 	
+  this.then(onFulfilled, onRejected) 
+    .catch(function (reason) { 
+    // 抛出一个全局错误 
+    setTimeout(() => { throw reason }, 0); 
+  }); 
+};
+```
+
+**finally()** 
+
+finally 方法用于指定**不管Promise对象最后状态如何，都会执行的操作**。它与 done 方法的最大区别，**它接受一个普通的回调函数作为参数**，该函数不管怎样都必须执行。 
+
+```js
+// 示例：服务器使用Promise处理请求，然后使用 finally 方法关掉服务器
+server.listen(0) 
+  .then(function () { 
+  // run test 
+	})
+  .finally(server.stop);
+// 实现
+Promise.prototype.finally = function (callback) { 
+  let P = this.constructor; 
+  return this.then( 
+    value => P.resolve(callback()).then(() => value), 	
+    reason => P.resolve(callback()).then(() => { throw reason }) 
+  ); 
+};
+```
+
+### 应用
+
+1、加载图片。将图片的加载写成一个Promise，一旦加载完成，Promise的状态就发生变化。
+
+```js
+const preloadImage = function(path) {
+  return new Promise(function(resolve, reject) {
+    var image = new Image();
+    image.onload = resolve;
+    image.onerror = reject;
+    image.src = path;
+  });
+};
+```
+
+2、**Generator**函数与**Promise**的结合。使用Generator函数管理流程，遇到异步操作的时候，通常返回一个 Promise 对象。
+
+3、**async**函数。async函数与Promise、Generator函数一样，是用来取代回调函数、解决异步操作的一种方法。**它本质上是Generator函数的语法糖**。async函数并不属于ES6，而是被列入了ES7，但是traceur、Babel.js、regenerator等转码器已经支持这个功能，转码后立刻就能使用。
 
 ## **Babel**转码器 
 
