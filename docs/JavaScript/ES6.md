@@ -122,8 +122,153 @@ window.b // undefined
 * 基本的字符串格式化。将表达式嵌入字符串中进行拼接。用${}来界定。
 * 通过反引号(``)做多行字符串或者单行字符串的拼接。
 
-
 ## 变量的解构赋值
+
+> 数组元素有序，变量的取值由位置决定，对象属性无序，变量必须与属性同名，才能取到正确的值。
+>
+> 
+
+#### 数组的解构赋值
+
+ES6允许按照一定模式，**从数组和对象中提取值，对变量进行赋值**，这被称为解构 （Destructuring）。 
+
+```js
+// 从数组中提取值，按照对应位置，对变量赋值
+let [a, b, c] = [1, 2, 3];
+let [ , , third] = ["foo", "bar", "baz"]; 
+console.log(third); // "baz"
+let [head, ...tail] = [1, 2, 3, 4]; 
+console.log(head); // 1 
+console.log(tail); // [2, 3, 4]
+let [x, y, ...z] = ['a'];
+console.log(x); // "a"
+console.log(y); // undefined
+console.log(z); // []
+
+```
+
+这种写法属于“模式匹配”，只要等号两边的模式相同，左边的变量就会被赋予对应的值。
+
+另一种情况是不完全解构，即**等号左边的模式，只匹配一部分的等号右边的数组**。这种情况下，解构依然可以成功。但如果等号右边不是数组(不是可遍历的结构)，那么就会报错。
+
+```js
+let [x, y] = [1, 2, 3];
+console.log(x); // 1
+console.log(y); // 2
+let [a, [b], d] = [1, [2, 3], 4];
+console.log(a); // 1
+console.log(b); // 2
+console.log(d); // 4
+
+// 下列的均会报错
+let [foo] = 1;
+let [foo] = false;
+let [foo] = NAN;
+let [foo] = undefined;
+let [foo] = null;
+let [foo] = {};
+```
+
+解构赋值适用于 `var`、`let`、`const`命令。对于`Set`结构，也可以使用数组的解构赋值。**只要某种数据结构具有Iterator接口**，都可以采用数组形式的解构赋值。
+
+```js
+let [x, y, z] = new Set(["a", "b", "c"]);
+console.log(x); // a
+// Generator函数
+function* fibs() { 
+    var a = 0; 
+    ar b = 1; 
+    while (true) { 
+        yield a; 
+        [a, b] = [b, a + b]; 
+    } 
+}
+var [first, second, third, fourth, fifth, sixth] = fibs(); 
+sixth // 5
+```
+
+* 解构赋值允许指定默认值
+
+* 如果默认值是一个表达式，那么这个表达式是惰性求值的，即只有在用到的时候， 才会求值。 
+* 默认值可以引用解构赋值的其他变量，但该变量必须已经声明
+
+```js
+var [foo = true] = []; 
+foo // true 
+[x, y = 'b'] = ['a']; // x='a', y='b' 
+[x, y = 'b'] = ['a', undefined]; // x='a', y='b'
+var [x = 1] = [undefined]; 
+x // 1 
+// ES6内部使用严格相等运算符（ === ），判断一个位置是否有值。所以， 如果一个数组成员不严格等于 undefined ，默认值是不会生效的。null 不严格等于 undefined 。
+var [x = 1] = [null]; 
+x // null
+
+function f() { 
+    console.log('aaa'); 
+}
+let [x = f()] = [1];
+x // 1
+
+// 优先等号右边赋值，其次默认赋值
+let [x = 1, y = x] = []; // x=1; y=1 
+let [x = 1, y = x] = [2]; // x=2; y=2 
+let [x = 1, y = x] = [1, 2]; // x=1; y=2 
+let [x = y, y = 1] = []; // ReferenceError
+```
+
+#### 对象的解构赋值
+
+数组的元素是按次序排列的，变量的取值由它的位置决定；而对象的属性没有次序，变量必须与属性同名，才能取到正确的值。
+
+```js
+var { bar, foo } = { foo: "aaa", bar: "bbb" }; 
+foo // "aaa" 
+bar // "bbb" 
+var { baz } = { foo: "aaa", bar: "bbb" }; 
+baz // undefined
+
+var { foo: baz } = { foo: 'aaa', bar: 'bbb' }; 
+baz // "aaa"
+foo // error: foo is not defined  真正被赋值的是变量 baz ，而不是模式 foo 
+
+let obj = { first: 'hello', last: 'world' }; 
+let { first: f, last: l } = obj; 
+f // 'hello' 
+l // 'world'
+
+```
+
+* 对象的解构赋值的内部机制，是**先找到同名属性，然后再赋给对应的变量**。真正被赋值的是后者，而不是前者。
+
+* 解构也可以用于嵌套结构的对象。
+* 对象的解构也可以指定默认值。
+
+```js
+var { foo: baz } = { foo: "aaa", bar: "bbb" }; 
+baz // "aaa" 
+foo // error: foo is not defined
+// 解析器会 将起首的大括号，理解成一个代码块，而不是赋值语句
+let foo; ({foo} = {foo: 1}); // 成功
+var obj = { p: ['Hello', { y: 'World' } ] };
+var { p: [x, { y }] } = obj; 
+x // "Hello" 
+y // "World"
+
+let obj = {}; let arr = []; 
+({ foo: obj.prop, bar: arr[0] } = { foo: 123, bar: true }); 
+obj // {prop:123} 
+arr // [true]
+
+var {x, y = 5} = {x: 1}; 
+x // 1 
+y // 5
+var {x:y = 3} = {x: 5}; 
+y // 5
+var {x = 3} = {x: undefined}; 
+x // 3 
+var {x = 3} = {x: null}; 
+x // null
+```
 
 ## 箭头函数
 - 不需要function关键字来创建函数

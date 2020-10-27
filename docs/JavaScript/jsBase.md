@@ -1470,6 +1470,314 @@ Object.create()方法创建一个新对象，使用现有的对象来提供新�
   Foo = 'Fol'; // it's ok
   ```
 
+###  面向对象的程序设计详解
+
+每个对象都是基于一个引用类型创建的，这个引用类型可以是原生类型，也可以是开发人员定义的类型。
+
+#### 属性类型
+
+ECMAScript 中有两种属性：数据属性和访问器属性。
+
+##### 数据属性
+
+**数据属性包含一个数据值的位置。在这个位置可以读取和写入值。**数据属性有 4 个描述其行为的特性。
+
+| 属性名             | 描述                                                         | 属性默认值                                         |
+| ------------------ | ------------------------------------------------------------ | -------------------------------------------------- |
+| `[[Configurable]]` | 表示能否通过 delete 删除属性从而重新定义属性，能否修改属性的特性，或者能否把属性修改为访问器属性 | 对于直接在对象上定义的属性，这个特性的默认值为true |
+| `[[Enumerable]]`   | 表示能否通过 for-in 循环返回属性                             | 对于直接在对象上定义的属性，这个特性的默认值为true |
+| `[[Writable]]`     | 表示能否修改属性的值                                         | 对于直接在对象上定义的属性，这个特性的默认值为true |
+| `[[Value]]`        | 包含这个属性的数据值。读取属性值的时候，从这个位置读；写入属性值的时候，把新值保存在这个位置 | undefined                                          |
+
+要修改属性默认的特性，必须使用 ECMAScript 5 的` Object.defineProperty()`方法。这个方法接收三个参数：属性所在的对象、属性的名字和一个描述符对象。其中，描述符（descriptor）对象的属性必须是：`configurable、enumerable、writable 和 value`。设置其中的一或多个值，可以修改对应的特性值。例如：
+
+```js
+var person = {};
+Object.defineProperty(person, "name", {
+    wirtable: false,
+    value: "ramona"
+});
+alert(person.name); // "ramona"
+person.name = "raymond";
+alert(person.name); // "ramona"
+```
+
+可以多次调用 `Object.defineProperty()`方法修改同一个属性，但在把 `configurable`特性设置为` false `之后就会有限制了。
+
+在调用` Object.defineProperty()`方法时，如果不指定，`configurable、enumerable 和writable `特性的默认值都是 `false`。多数情况下，可能都没有必要利用 `Object.defineProperty()`方法提供的这些高级功能。
+
+##### 访问器属性
+
+访问器属性不包含数据值；它们包含一对儿 getter 和 setter 函数（不过，这两个函数都不是必需的）。**在读取访问器属性时，会调用 getter 函数，这个函数负责返回有效的值；在写入访问器属性时，会调用setter 函数并传入新值，这个函数负责决定如何处理数据**。访问器属性有如下 4 个特性。
+
+| 属性名             | 描述                                                         | 默认值                                             |
+| ------------------ | ------------------------------------------------------------ | -------------------------------------------------- |
+| `[[Configurable]]` | 表示能否通过 delete 删除属性从而重新定义属性，能否修改属性的特性，或者能否把属性修改为数据属性 | 对于直接在对象上定义的属性，这个特性的默认值为true |
+| `[[Enumerable]]`   | 表示能否通过 for-in 循环返回属性                             | 对于直接在对象上定义的属性，这个特性的默认值为true |
+| `[[Get]]`          | 在读取属性时调用的函数                                       | undefined                                          |
+| `[[Set]]`          | 在写入属性时调用的函数                                       | undefined                                          |
+
+访问器属性不能直接定义，必须使用` Object.defineProperty()`来定义。请看下面的例子。
+
+```js
+var book = { 
+ _year: 2004, 
+ edition: 1 
+}; 
+Object.defineProperty(book, "year", { 
+ get: function(){ 
+ return this._year; 
+ }, 
+ set: function(newValue){ 
+ if (newValue > 2004) { 
+ this._year = newValue; 
+ this.edition += newValue - 2004; 
+ } 
+ } 
+}); 
+book.year = 2005; 
+alert(book.edition); //2
+```
+
+> _year 前面的下划线是一种常用的记号，用于表示只能通过对象方法访问的属性
+
+#### 定义多个属性
+
+由于为对象定义多个属性的可能性很大，ECMAScript 5 又定义了一个 `Object.defineProperties()`方法。利用这个方法可以通过描述符一次定义多个属性。这个方法接收两个对象参数**：第一个对象是要添加和修改其属性的对象，第二个对象的属性与第一个对象中要添加或修改的属性一一对应**。例如：
+
+```js
+var book = {}; 
+Object.defineProperties(book, { 
+ _year: { 
+ value: 2004 
+ }, 
+ edition: { 
+ value: 1 
+ }, 
+ year: { 
+ get: function(){
+     return this._year; 
+ 	}, 
+ set: function(newValue){ 
+     if (newValue > 2004) { 
+     this._year = newValue; 
+     this.edition += newValue - 2004; 
+     } 
+ 	} 
+ } 
+});
+```
+
+> 支持 Object.defineProperties()方法的浏览器有 IE9+、Firefox 4+、Safari 5+、Opera 12+和Chrome。
+
+##### 读取属性的特性
+
+使用 ECMAScript 5 的 `Object.getOwnPropertyDescriptor()`方法，可以取得给定属性的描述符。**这个方法接收两个参数：属性所在的对象和要读取其描述符的属性名称**。返回值是一个对象，如果是访问器属性，这个对象的属性有 configurable、enumerable、get 和 set；如果是数据属性，这个对象的属性有 configurable、enumerable、writable 和 value。
+
+> 在 JavaScript 中，可以针对任何对象——包括 DOM 和 BOM 对象，使用 Object.getOwnPropertyDescriptor()方法。支持这个方法的浏览器有 IE9+、Firefox 4+、Safari 5+、Opera 12+和 Chrome。
+
+### 创建对象
+
+虽然 **Object 构造函数或对象字面量**都可以用来创建单个对象，但这些方式有个明显的缺点：使用同一个接口创建很多对象，会产生大量的重复代码。为解决这个问题，人们开始使用工厂模式的一种变体。
+
+#### 工厂模式
+
+工厂模式是软件工程领域一种广为人知的设计模式，这种模式抽象了创建具体对象的过程。
+
+```js
+function createPerson(name, age, job) {
+    var o = new Object();
+    o.name = name;
+    o.age = age;
+    o.job = job;
+    o.sayName = function() {
+        alert(this.name);
+    }
+    return o;
+}
+
+var person1 = createPerson("ramona", 20, "Doctor");
+var person2 = createPerson("raymond", 24, "Teacher");
+```
+
+缺点：**工厂模式虽然解决了创建多个相似对象的问题，但却没有解决对象识别的问题**（即怎样知道一个对象的类型）。
+
+#### 构造函数模式
+
+ECMAScript 中的构造函数可用来创建特定类型的对象。像 Object 和 Array 这样的原生构造函数，在运行时会自动出现在执行环境中。此外，也可以创建自定义的构造函数，从而定义自定义对象类型的属性和方法。例如，可以使用构造函数模式将前面的例子重写如下。
+
+```js
+function Person(name, age, job) {
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.sayName = function() {
+        alert(this.name);
+    }
+}
+
+var person1 = new Person("ramona", 20, "Doctor");
+var person2 = new Person("raymond", 24, "Teacher");
+
+// person1 和 person2 分别保存着 Person 的一个不同的实例。这两个对象都有一个 constructor（构造函数）属性，该属性指向 Person
+console.log(person1.constructor == Person); // true
+console.log(person2.constructor == Person); // true
+```
+
+> `new`操作符的实现原理：
+>
+> 1. 创建一个新对象；
+> 2. 将构造函数的作用域赋给新对象（this就指向这个新对象）；
+> 3. 执行构造函数中的代码（为这个新对象添加属性）；
+> 4. 返回新对象。
+
+任何函数，只要通过 new 操作符来调用，那它就可以作为构造函数；而任何函数，如果不通过 new 操作符来调用，那它跟普通函数也不会有什么两样。
+
+缺点：**使用构造函数的主要问题，就是每个方法都要在每个实例上重新创建一遍**。然而，创建两个完成同样任务的 Function 实例的确没有必要；况且有 this 对象在，根本不用在执行代码前就把函数绑定到特定对象上面。因此，大可像下面这样，**通过把函数定义转移到构造函数外部来解决这个问题。**
+
+```js
+// 存在的问题
+function Person(name, age, job){ 
+ this.name = name; 
+ this.age = age; 
+ this.job = job; 
+ this.sayName = new Function("alert(this.name)"); // 与声明函数在逻辑上是等价的
+}
+
+// 解决方法
+function Person(name, age, job){
+ this.name = name; 
+ this.age = age; 
+ this.job = job; 
+ this.sayName = sayName; 
+} 
+function sayName(){ 
+ alert(this.name); 
+} 
+var person1 = new Person("Nicholas", 29, "Software Engineer"); 
+var person2 = new Person("Greg", 27, "Doctor");
+```
+
+但是，在全局作用域中定义的函数实际上只能被某个对象调用，这让全局作用域有点名不副实。而更让人无法接受的是：**如果对象需要定义很多方法，那么就要定义很多个全局函数，于是我们这个自定义的引用类型就丝毫没有封装性可言了**。这些问题可以通过使用原型模式来解决。
+
+#### 原型模式
+
+我们创建的每个函数都有一个 **prototype（原型）属性**，这个属性是一个指针，指向一个对象，而这个对象的用途是**包含可以由特定类型的所有实例共享的属性和方法**。如果按照字面意思来理解，那么 prototype 就是通过调用构造函数而创建的那个对象实例的原型对象。**使用原型对象的好处是可以让所有对象实例共享它所包含的属性和方法**。换句话说，不必在构造函数中定义对象实例的信息，而是可以将这些信息直接添加到原型对象中。
+
+```js
+function Person() {
+    Person.prototype.name = "ramona";
+    Person.prototype.age = 24;
+    Person.prototype.job = "Dector";
+    Person.prototype.sayName = function() {
+        alert(this.name);
+    }
+}
+
+var person1 = new Person();
+person1.sayName(); // "ramona"
+var person2 = new Person();
+person2.sayName(); // "ramona"
+alert(person1.sayName == person2.sayName); // true
+```
+
+##### 原型对象
+
+无论什么时候，只要**创建了一个新函数**，就会根据一组特定的规则**为该函数创建一个 prototype属性，这个属性指向函数的原型对象**。在默认情况下，**所有原型对象都会自动获得一个constructor（构造函数）属性，这个属性包含一个指向 prototype 属性所在函数的指针**。
+
+```js
+console.log(Person.prototype); 
+// 输出:
+{name: "ramona", age: 24, job: "Dector", sayName: ƒ, constructor: ƒ}
+console.log(Person.prototype.constructor);
+// 输出：
+ƒ Person() {
+    Person.prototype.name = "ramona";
+    Person.prototype.age = 24;
+    Person.prototype.job = "Dector";
+    Person.prototype.sayName = function() {
+        alert(this.name);
+    }
+}
+console.log(Person.prototype.constructor == Person); // true
+```
+
+**创建了自定义的构造函数之后，其原型对象默认只会取得 constructor 属性**；至于其他方法，则都是从 Object 继承而来的。**当调用构造函数创建一个新实例后，该实例的内部将包含一个指针（内部属性），指向构造函数的原型对象**。ECMA-262 第 5 版中管这个指针叫[[Prototype]]。虽然在脚本中没有标准的方式访问**[[Prototype]]**，但 Firefox、Safari 和 Chrome 在每个对象上都**支持一个属性`__proto__`**；而在其他实现中，这个属性对脚本则是完全不可见的。
+
+```js
+console.log(person1.__proto__); 
+// 输出：
+{name: "ramona", age: 24, job: "Dector", sayName: ƒ, constructor: ƒ}
+console.log(person1.__proto__.constructor);
+// 输出：
+ƒ Person() {
+    Person.prototype.name = "ramona";
+    Person.prototype.age = 24;
+    Person.prototype.job = "Dector";
+    Person.prototype.sayName = function() {
+        alert(this.name);
+    }
+}
+console.log(person1.__proto__ == Person.prototype); // true
+```
+
+以前面使用 Person 构造函数和 Person.prototype 创建实例的代码为例，下图展示了各个对象之间的关系。
+
+![image-20201003150535938](https://i.loli.net/2020/10/27/kF8UAwW9zXlt3If.png)
+
+```js
+Person.prototype
+Person.prototype.constructor == Person;
+person1.__proto__ == Person.prototype;
+```
+
+确定对象之间存在的关系及取得一个对象的原型的方法：
+
+```js
+console.log(Person.prototype.isPrototypeOf(person1)); // true
+console.log(Person.prototype.isPrototypeOf(person2)); // true
+// 使用 Object.getPrototypeOf()可以方便地取得一个对象的原型
+console.log(Object.getPrototypeOf(person1) == Person.prototype); // true
+```
+
+使用 hasOwnProperty()方法可以检测一个属性是存在于实例中，还是存在于原型中。
+
+```js
+console.log(person1.hasOwnProperty("name")); // false (来自原型)
+console.log(Person.prototype.hasOwnProperty("name")); // true (来自原型)
+person1.name = "raymond";
+console.log(person1.hasOwnProperty("name")); // true (来自实例)
+delete person1.name; 
+console.log(person1.hasOwnProperty("name")); // false (来自原型)
+```
+
+in 操作符会在通过对象能够访问给定属性时返回 true，无论该属性存在于实例中还是原型中。
+
+```js
+console.log("name" in person1); // true (来自原型)
+person1.name = "raymond";
+console.log("name" in person1); // true (来自实例)
+delete person1.name; 
+console.log("name" in person1); // true (来自原型)
+```
+
+> name 属性要么是直接在对象上访问到的，要么是通过原型访问到的。因此，调用"name" in person1 始终都返回 true，无论该属性存在于实例中还是存在于原型中。
+
+同时使用 hasOwnProperty()方法和 in 操作符，就可以确定该属性到底是存在于对象中，还是存在于原型中。
+
+```js
+function hasPrototypeProperty(object, name) {
+    return !object.hasOwnProperty(name) && (name in object);
+}
+```
+
+由于 in 操作符只要通过对象能够访问到属性就返回 true，hasOwnProperty()只在属性存在于实例中时才返回 true，因此只要 in 操作符返回 true 而 hasOwnProperty()返回 false，就可以确定属性是原型中的属性。
+
+原型模式的缺点：
+
+* 它省略了为构造函数传递初始化参数这一环节，结果所有实例在默认情况下都将取得相同的属性值。
+* **最大问题是由其共享的本性所导致的**。
+
 ## `for-of`和`for-in`的区别
 
 #### 1、`for-of`
