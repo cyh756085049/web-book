@@ -335,6 +335,64 @@ console.log(total) // { a: 1, b: 2, c: 3, d: 4 }
 
 ## Symbol
 
+Symbol 实例是唯一且不可改变的。
+
+Symbol 对象是 Symbol原始值的封装。
+
+Symbol 的**描述是可选的，但仅用于调试目的**。
+
+```js
+Symbol("foo") !== Symbol("foo")
+const foo = Symbol()
+const bar = Symbol()
+typeof foo === "symbol"
+typeof bar === "symbol"
+```
+
+- 为什么要引入symbol？
+
+> ES5 的**对象属性名**都是**字符串**，这**容易造成属性名的冲突**。
+>
+> 比如，你使用了一个他人提供的对象，但又想为这个对象添加新的方法（mixin 模式），新方法的名字就有可能与现有方法产生冲突。
+>
+> 如果有一种机制，**保证每个属性的名字都是独一无二**的就好了，这样就从根本上防止属性名的冲突。
+>
+> ES6 引入了一种新的原始数据类型**Symbol，表示独一无二的值**。
+
+- 生成方式：
+
+> Symbol 值通过Symbol函数生成。
+
+```js
+let s = Symbol()
+typeof s // "symbol"
+```
+
+Symbol函数前**不能使用new命令**，否则会报错。这是因为生成的Symbol是一个原始类型的值，**不是对象**。
+
+- 参数
+
+`description`: 可选。string。对Symbol实例的描述，仅用于调试。
+
+- 遍历
+
+ES6之前的方法，无法获取。
+
+```js
+onst foo = Symbol()
+const bar = Symbol()
+
+let obj = {}
+obj[foo] = "foo"
+obj[bar] = "bar"
+
+JSON.stringify(obj) // {}
+Object.keys(obj) // []
+Object.getOwnPropertyNames(obj) // []
+Object.getOwnPropertySymbols(obj) // [ Symbol(), Symbol() ]
+Reflect.ownKeys(obj) // [Symbol(), Symbol()]
+```
+
 ## Set和Map数据结构
 
 ### Set
