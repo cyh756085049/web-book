@@ -136,6 +136,19 @@ function myNew(fn, ...args) {
 }
 ```
 
+## 手写一个结合all和race的方法，所有都resolved/reject时才返回，并返回所有的结果
+
+```js
+async function  allResolve(promises){
+   const success = Array.from(promises).map(promise=>{
+ 			Promise.resolve(promise).then(val=>val).catch(err=>err);
+      })
+   return await Promise.all(success);
+}
+```
+
+
+
 ## 防抖和节流实现
 
 ### 防抖

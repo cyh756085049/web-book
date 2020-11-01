@@ -456,6 +456,68 @@ vue.js 是采用数据劫持结合发布者-订阅者模式的方式，通过 Ob
 
 第四步：MVVM 作为数据绑定的入口，整合 Observer、Compile 和 Watcher 三者，通过 Observer 来监听自己的 model 数据变化，通过 Compile 来解析编译模板指令，最终利用 Watcher 搭起 Observer 和 Compile 之间的通信桥梁，达到数据变化 -> 视图更新；视图交互变化(input) -> 数据 model 变更的双向绑定效果。
 
+## vue的keep-alive
+
+`keep-alive`是`vue2.0`加入的一个特性， 是 vue 内置的组件，用 keep-alive 包裹组件时，会缓存不活动的组件实例，而不是销毁他们。主要用于保存组件状态或避免重复创建。避免重复渲染导致的性能问题。缓存的好处：
+
+1. 节省性能消耗，避免一个组件频繁重新渲染，节省开支
+2. 保存用户状态，比如说：我们在填写收货地址的页面，需要跳转到另一个页面通过定位选择地址信息再返回继续填写，这时候需要缓存收货地址页面，避免跳转页面导致用户数据丢失。
+
+##### 特点
+
+- 它是一个抽象组件，自身不会渲染一个 dom 元素，也不会出现在组件的父组件链中。
+- 当组件在 keep-alive 内被切换，组件的 activated 和 deactivated 这两个生命周期钩子函数会被执行。组件一旦被 缓存，再次渲染就不会执行 created、mounted 生命周期钩子函数。
+- 要求同时只有一个子组件被渲染。
+- 不会在函数式组件中正常工作，因为它们没有缓存实例。
+
+> 风鸢：https://juejin.im/post/6859766534874038285
+
+##### keep-alive 实现原理
+
+组件通过插槽，获取第一个子节点。根据 include、exclude 判断是否需要缓存，通过组件的 key，判断是否命中缓存。利用 LRU 算法，更新缓存以及对应的 keys 数组。根据 max 控制缓存的最大组件数量。
+
+##### 业务需求
+
+1. 跳转到详情页面时，需要保持列表页的滚动条的深度，等返回的时候依然在这个位置，这样可以提高用户体验。在 Vue 中，对于这种“页面缓存”的需求，我们可以使用 keep-alive 组件来解决这个需求。
+2. 在最近的开发中，设计有 A、B、C 三个页面，试想这样一个场景需求：
+
+- 离开 B 页面进入 C 页面，缓存 B 页面数据（keepAlive: true）
+- 离开 B 页面进入 A 页面，不缓存 B 页面数据（keepAlive: false)
+
+##### 用法:
+
+缓存组件，被`keep-alive`只会渲染一次;缓存路由，所有在`keep-alive`标签下的路由都会被缓存 。
+
+有些时候，我们只需要缓存部分页面或者某些组件。
+
+#### 方法一：router.meta
+
+```vue
+<keep-alive>
+    <router-view v-if="$route.meta.isKeepAlive"></router-view>
+</keep-alive>
+```
+
+#### 方法二：inlcude/exclude
+
+```vue
+<keep-alive :include="/mytable | mybuttom/" :exclude="/myselect/">
+  <component :is="componentName"></component>
+</keep-alive>
+```
+
+- include 白名单 只有名称匹配的组件会被缓存
+- exclude 黑名单 任何匹配的组件都不会被缓存
+- max 最多缓存多少个实例，一旦达到这个数字，新实例被创建之前，会销毁已缓存组件中最久没有被访问的实例。LRU 算法
+
+#### 方法三：动态判断
+
+```vue
+<keep-alive :include="keepAliveArr">
+  <component :is="componentName"></component>
+</keep-alive>
+```
+
 ## v-show 与 v-if 区别
 
 区别：
