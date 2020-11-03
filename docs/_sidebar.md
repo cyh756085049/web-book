@@ -1,11 +1,11 @@
-* [HTML](HTML/) 
-    * [HTML 基础知识](HTML/HTML)
-    * [HTML5 变化](HTML/HTML5)
+* [HTML](html/) 
+    * [HTML 基础知识](html/HTML)
+    * [HTML5 变化](html/HTML5)
     <!-- * [HTML 常见案例](html/) -->
 
-* [CSS](CSS/) 
-    * [CSS 基础知识](CSS/cssBase)
-    * [CSS 常见手撕代码](CSS/cssCode)
+* [CSS](css/) 
+    * [CSS 基础知识](css/cssBase)
+    * [CSS 常见手撕代码](css/cssCode)
 
 * [JavaScript](JavaScript/)
     * [JS 基础知识](JavaScript/jsBase)
@@ -17,18 +17,18 @@
         * [日期](JavaScript/date/dateCode)
         * [存储](JavaScript/storage/storageCode)
 
-* [Vue](Vue/)
+* [Vue](vue/)
     <!-- * [Vue 底层原理](Vue/Vue) -->
-    * [Vue 源码解析](Vue/vue)
-    * [Vue 常见手撕代码](Vue/)
+    * [Vue 源码解析](vue/vue)
+    * [Vue 常见手撕代码](vue/)
 
-* [Web 安全](Web/web)
+* [Web 安全](web/web)
 
-* [TypeScript](TypeScript/TypeScript)
+* [TypeScript](typescript/TypeScript)
 
-* [前端工程化 webpack](Webpack/webPack)
+* [前端工程化 webpack](webpack/webPack)
 
-* [数据可视化](DataView/dataView)
+* [数据可视化](dataview/dataView)
 
 * [操作系统](OS/)
     * [操作系统基础知识](OS/Basic)
@@ -38,10 +38,6 @@
     * [HTTP与HTTPS](Network/HTTP)
     * [TCP/IP](Network/TCPIP)
 
-* [操作系统](OS/)
-    * [操作系统基础知识](OS/Basic)
-    * [Linux 常见命令](OS/Command)
-
 * [LeetCode算法](LeetCode/)
     * [动态规划](LeetCode/DP/)
     * [网格搜索](LeetCode/GridSearch)
@@ -49,9 +45,9 @@
     * [两点](LeetCode/TwoPointers)
     * [二分搜索](LeetCode/BinarySearch)
 
-* [NodeJS](Node/)
+* [NodeJS](node/)
 
-* [React](React/)
+* [React](react/)
 
 * [Angular](angular/)
 
