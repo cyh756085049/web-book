@@ -833,7 +833,16 @@ History interface是浏览器历史记录栈提供的接口，从HTML5开始，H
 
 
 
+##  watch中deep和immediate的作用 
 
+使用watch时有一个特点，就是当值第一次绑定的时候，不会执行监听函数，只有值发生改变才会执行。如果我们需要在最初绑定值的时候也执行函数，则就需要用到immediate属性。 
+
+handler方法和immediate属性
+比如当父组件向子组件动态传值时，子组件props首次获取到父组件传来的默认值时，也需要执行函数，此时就需要将immediate设为true
+
+watch 里面还有一个属性 `deep`，默认值是 `false`，代表是否深度监听。当需要监听一个对象的改变时，普通的watch方法无法监听到对象内部属性的改变，只有data中的数据才能够监听到变化，此时就需要deep属性对对象进行深度监听。如果只需要监听对象中的一个属性值，则可以做以下优化：使用字符串的形式监听对象属性：这样只会给对象的某个特定的属性加监听器
+
+> https://blog.csdn.net/Amanda_wmy/article/details/83749560
 
 
 

@@ -147,6 +147,26 @@ async function  allResolve(promises){
 }
 ```
 
+## 直接查找字符串
+
+- 不存在返回 false
+- 存在，截取 `/` 后面的数字。
+
+```javascript
+function find(userAgent) {
+  const idx = userAgent.indexOf("tigerbroker");
+  if (idx === -1) {
+    return "false";
+  } else {
+    let idxOfApp = userAgent.indexOf(".app");
+    let res = userAgent.substring(idx + "tigerbroker".length() + 1, idx2);
+    return res;
+  }   
+}
+```
+
+
+
 
 
 ## 防抖和节流实现
