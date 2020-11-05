@@ -796,6 +796,23 @@ function compose(fn) {
   }
 }
 ```
+##  输出数组中出现次数最多的字母前数字的和
+```js
+function sum(arr) {
+    let res = {};
+    arr.forEach(item => {
+      res[item[1]] ? res[item[1]] += Number(item[0]) : res[item[1]] = Number(item[0]);
+    })
+    let sum = 0;
+    for (let i in res) {
+      if (res[i] > sum) {
+        sum = res[i]
+      }
+    }
+    return sum
+  }
+
+```
 
 ## 让a == 1 且 a == 2结果为true
 

@@ -51,6 +51,9 @@
 
 * [Angular](angular/)
 
+* [微信小程序](wechat/)
+    * [微信小程序基础](wechat/weChat)
+
 * [面试中常问到的区别](faceDiff)
 
 * [调试技巧](Power/)

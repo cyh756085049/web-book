@@ -522,3 +522,29 @@ jQuery的 `.html()` 会调用`.innerHTML`来操作，但是会捕获异常，然
 
 1. focus/blur 不冒泡，focusin/focusout 冒泡
 2. focus/blur 兼容性好，focusin/focusout 在除 FireFox 外的浏览器下都保持良好兼容性，如需使用事件托管，可考虑在 FireFox 下使用事件捕获 elem.addEventListener('focus', handler, true)
+
+## onload、DOMReady 的区别 
+
+### Dom文档加载的步骤：
+
+1. 解析html结构；
+2. 加载外部脚本和样式表文件；
+3. 解析并执行脚本；
+4. dom树构建完成（DOMContentLoaded）；
+5. 加载图片等外部文件；
+6. 页面加载完毕。
+
+DOM ready：（也叫DOMContentLoaded ），在dom树构建完成后触发；
+ 图片onload：是在加载图片等外部文件完成后触发；
+ 页面onload：是页面加载完成后触发。
+
+由此可见三者执行顺序为：**domready→图片load→页面load。**
+
+### domready和onload事件区别
+
+前者：在DOM文档结构准备完毕后就可以对DOM进行操作；
+ 后者：当页面完全加载后（整个document文档包括图片、javascript文件、CSS文件等外部资源)，就会触发window上面的load事件。
+
+##  原生js实现一个事件绑定和一个事件解绑的函数。 
+
+![image-20200930134429886](https://tva1.sinaimg.cn/large/007S8ZIlly1gj8mkp1wwsj30xw09aab8.jpg)
