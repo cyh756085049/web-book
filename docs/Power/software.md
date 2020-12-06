@@ -14,6 +14,10 @@
 
 * ##### 各类网站软件收集
 
+  [CopyTranslator](https://copytranslator.github.io/) 
+
+  论文翻译好帮手，复制即翻译的外文辅助阅读翻译解决方案。
+
 | **系统软件**                                                 |                                                              |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | [SpaceSniffer](https://www.runningcheese.com/go?url=https://www.fosshub.com/SpaceSniffer.html) | 直观地查看硬盘占用情况。                                     |
