@@ -23,7 +23,7 @@
 
 **单进程浏览器是指浏览器的所有功能模块都是运行在同一个进程里**，这些模块包含了网络、插件、JavaScript 运行环境、渲染引擎和页面等。
 
-![单进程浏览器架构图](https://tva1.sinaimg.cn/large/0081Kckwly1glcy7vh8puj30yq0icwmj.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glcy7vh8puj30yq0icwmj.jpg" alt="单进程浏览器架构图" style="zoom:50%;" />
 
 #### 导致的问题
 
@@ -38,7 +38,7 @@
 
 2008 年 Chrome 发布时的进程架构如下，Chrome 的页面是运行在单独的渲染进程中的，同时页面里的插件也是运行在单独的插件进程之中，而进程之间是通过 IPC 机制进行通信（图中虚线部分）。
 
-![早期Chrome进程架构图](https://tva1.sinaimg.cn/large/0081Kckwly1glcyiw2o28j30z60pyk2a.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glcyiw2o28j30z60pyk2a.jpg" alt="早期Chrome进程架构图" style="zoom:50%;" />
 
 #### 解决单进程浏览器时代问题
 
@@ -51,7 +51,7 @@
 
 最新的 Chrome 浏览器包括：1 个浏览器（Browser）主进程、1 个GPU 进程、1 个网络（NetWork）进程、多个渲染进程和多个插件进程。
 
-![最新的Chrome进程架构图](https://tva1.sinaimg.cn/large/0081Kckwly1glcyved3mbj30yi0i2dl7.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glcyved3mbj30yi0i2dl7.jpg" alt="最新的Chrome进程架构图" style="zoom:50%;" />
 
 | 进程名称   | 功能描述                                                     |
 | ---------- | ------------------------------------------------------------ |
@@ -75,13 +75,13 @@
 
 为了解决这些问题，在 2016 年，Chrome 官方团队使用**“面向服务的架构”（ServicesOriented Architecture，简称SOA）**的思想设计了新的 Chrome 架构。原来的各种模块会被重构成独立的服务（Service），每个服务（Service）都可以在独立的进程中运行，访问服务（Service）必须使用定义好的接口，**通过 IPC 来通信，从而构建一个更内聚、松耦合、易于维护和扩展的系统**，更好实现 Chrome 简单、稳定、高速、安全的目标。
 
-![面向服务的架构模型图](https://tva1.sinaimg.cn/large/0081Kckwly1glczcszgr5j31040l2ten.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glczcszgr5j31040l2ten.jpg" alt="面向服务的架构模型图" style="zoom:50%;" />
 
 Chrome 最终要把 UI、数据库、文件、设备、网络等模块重构为基础服务，类似操作系统底层服务。
 
 Chrome 还提供灵活的弹性架构，在强大性能设备上会以多进程的方式运行基础服务，但是如果在资源受限的设备上（如下图），Chrome 会将很多服务整合到一个进程中，从而节省内存占用。
 
-![](https://tva1.sinaimg.cn/large/0081Kckwly1glczf5crmqj31080mkn6a.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glczf5crmqj31080mkn6a.jpg" style="zoom:50%;" />
 
 ## TCP协议
 
@@ -131,7 +131,7 @@ UDP 中一个最重要的信息是**端口号**，端口号其实就是一个数
 
 一个完整的 TCP 连接的生命周期包括了“建立连接”“传输数据”和“断开连接”三个阶段。
 
-![一个TCP连接的生命周期](https://tva1.sinaimg.cn/large/0081Kckwly1gld2crerjhj30vy0e4q75.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gld2crerjhj30vy0e4q75.jpg" alt="一个TCP连接的生命周期" style="zoom:50%;" />
 
 **建立连接阶段**。这个阶段是通过“**三次握手**”来建立客户端和服务器之间的连接。TCP 提供面向连接的通信传输。**面向连接是指在数据通信开始之前先做好两端之间的准备工作**。所谓三次握手，是指在建立一个 TCP 连接时，**客户端和服务器总共要发送三个数据包以确认连接的建立。**
 
@@ -155,7 +155,7 @@ UDP 负责把数据包送达具体应用。
 
 **HTTP 协议，正是建立在 TCP 连接基础之上的**。**HTTP 是一种允许浏览器向服务器获取资源的协议，是 Web 的基础**，通常由浏览器发起请求，用来获取不同类型的文件，例如HTML 文件、CSS 文件、JavaScript 文件、图片、视频等。此外，HTTP 也是浏览器使用最广的协议。
 
-![HTTP请求流程](https://tva1.sinaimg.cn/large/0081Kckwly1gld98uqgldj30zy0fsaft.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gld98uqgldj30zy0fsaft.jpg" alt="HTTP请求流程" style="zoom:50%;" />
 
 ### 浏览器端发起 HTTP 请求流程
 
@@ -175,7 +175,7 @@ UDP 负责把数据包送达具体应用。
 
 浏览器使用**HTTP 协议作为应用层协议**，用来封装请求的文本信息；并使用**TCP/IP 作传输层协议**将它发到网络上，所以在 HTTP 工作开始之前，浏览器需要通过 TCP 与服务器建立连接。也就是说**HTTP 的内容是通过 TCP 的传输数据阶段来实现的**。
 
-![TCP和HTTP关系](https://tva1.sinaimg.cn/large/0081Kckwly1gld324ft0hj30wk0kgafy.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gld324ft0hj30wk0kgafy.jpg" alt="TCP和HTTP关系" style="zoom:50%;" />
 
 从图中可以看出，HTTP 网络请求的第一步是和服务器建立 TCP 连接。而建立TCP连接的第一步是需要准备IP地址和端口号。
 
@@ -197,7 +197,7 @@ UDP 负责把数据包送达具体应用。
 
 一旦建立了 TCP 连接，浏览器就可以和服务器进行通信了。而 HTTP 中的数据正是在这个通信过程中传输的。
 
-![HTTP请求数据格式](https://tva1.sinaimg.cn/large/0081Kckwly1gld3ob07hpj30w40l617w.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gld3ob07hpj30w40l617w.jpg" alt="HTTP请求数据格式" style="zoom:50%;" />
 
 首先浏览器会向服务器发送请求行，它包括了**请求方法、请求 URI（Uniform ResourceIdentifier）和 HTTP 版本协议**。
 
@@ -215,7 +215,7 @@ HTTP 的请求信息被送达了服务器后，服务器会根据浏览器的请
 
 > -i是为了返回响应行、响应头和响应体的数据
 
-![服务器响应的数据格式](https://tva1.sinaimg.cn/large/0081Kckwly1gld4e3muebj30v80loalk.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gld4e3muebj30v80loalk.jpg" alt="服务器响应的数据格式" style="zoom:50%;" />
 
 首先服务器会返回响应行，包括协议版本和状态码。但并不是所有的请求都可以被服务器处理，对于一些无法处理或者处理出错的信息，服务器会通过请求行的状态码来告诉浏览器它的处理结果，最常用的状态码是 200，表示处理成功；如果没有找到页面，则会返回404，还会出现403，500等状态码。
 
@@ -235,11 +235,11 @@ HTTP 的请求信息被送达了服务器后，服务器会根据浏览器的请
 
 > -I表示只需要获取响应头和响应行数据，而不需要获取响应体的数据。
 
-![重定向格式](https://tva1.sinaimg.cn/large/0081Kckwly1gld4y2x3pij30vo0j6qd8.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gld4y2x3pij30vo0j6qd8.jpg" alt="重定向格式" style="zoom:50%;" />
 
 ### 浏览器资源缓存
 
-![缓存查找示意图](https://tva1.sinaimg.cn/large/0081Kckwly1gld8n3u7bhj30t80wi1b1.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gld8n3u7bhj30t80wi1b1.jpg" alt="缓存查找示意图" style="zoom:50%;" />
 
 当服务器返回HTTP 响应头给浏览器时，**浏览器是通过响应头中的 `Cache-Control` 字段来设置是否缓存该资源**。通常，我们还**需要为这个资源设置一个缓存过期时长，而这个时长是通过 `Cache-Control` 中的 `Max-age` 参数来设置的**，比如上图设置的缓存过期时间是 2000 秒：`Cache-Control:Max-age=20`。
 
@@ -258,7 +258,7 @@ HTTP 的请求信息被送达了服务器后，服务器会根据浏览器的请
 
 > 总结：如果服务器端发送的响应头内有 Set-Cookie 的字段，那么浏览器就会将该字段的内容保持到本地。当下次客户端再往该服务器发送请求时，客户端会自动在请求头中加入Cookie 值后再发送出去。服务器端发现客户端发送过来的 Cookie 后，会去检查究竟是从哪一个客户端发来的连接请求，然后对比服务器上的记录，最后得到该用户的状态信息。
 
-![Cookie流程图](https://tva1.sinaimg.cn/large/0081Kckwly1gld95bhek8j30xw0rsah7.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gld95bhek8j30xw0rsah7.jpg" alt="Cookie流程图" style="zoom:50%;" />
 
 浏览器：用户打开登录页面，在登录框里填入用户名和密码，点击确定按钮。点击按钮会触发页面脚本生成用户登录信息，然后调用 POST 方法提交用户登录信息给服务器。
 
@@ -284,7 +284,7 @@ HTTP 的请求信息被送达了服务器后，服务器会根据浏览器的请
 
 !> 用户发出URL请求到页面开始解析的这个过程，叫做**导航**。
 
-![从输入url到页面展示完整流程](https://tva1.sinaimg.cn/large/0081Kckwly1gle6zootl6j30xu0h0ajz.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gle6zootl6j30xu0h0ajz.jpg" alt="从输入url到页面展示完整流程" style="zoom:50%;" />
 
 整个流程中需要各个进程之间的配合，浏览器进程主要负责用户交互、子进程管理和文件存储等功能；网络进程主要面向渲染进程和浏览器进程等提供网络下载功能；渲染进程主要负责把从网络下载的 HTML、JavaScript、CSS、图片等资源解析为可以显示和交互的页面。
 
@@ -327,7 +327,7 @@ HTTP 的请求信息被送达了服务器后，服务器会根据浏览器的请
 
 URL 请求的数据类型，有时候是一个下载类型，有时候是正常的 HTML 页面，浏览器就需要通过`Content-Type`区分，**`Content-Type` 是 HTTP 头中一个非常重要的字段， 它告诉浏览器服务器返回的响应体数据是什么类型**，然后浏览器会根据 `Content-Type` 的值来决定如何显示响应体的内容。
 
-![](https://tva1.sinaimg.cn/large/0081Kckwly1gle8jhdykmj30uq0ecqbt.jpg)
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gle8jhdykmj30uq0ecqbt.jpg" style="zoom:50%;" />
 
 需要注意的是，如果服务器配置` Content-Type` 不正确，比如将 `text/html `类型配置成`application/octet-stream` 类型，那么浏览器可能会曲解文件内容，比如会将一个本来是用来展示的页面，变成了一个下载文件。
 
@@ -381,3 +381,184 @@ Chrome 的默认策略是，**每个标签对应一个渲染进程。但如果�
 #### 5. 渲染阶段
 
 一旦文档被提交，渲染进程便开始页面解析和子资源加载了。一旦页面生成完成，渲染进程会发送一个消息给浏览器进程，浏览器接收到消息后，会停止标签图标上的加载动画。至此，一个完整的页面就生成了。
+
+## 渲染流程
+
+> HTML、CSS和JavaScript，是如何变成页面的？
+
+HTML、CSS和JavaScript的相关含义如下图：
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glf273whszj30w60ni0yj.jpg" alt="HTML、CSS和JavaScript关系图" style="zoom:50%;" />
+
+HTML 的内容是由标记（标签）和文本组成；CSS 又称为层叠样式表，是由选择器和属性组成；JavaScript是使网页的内容“动”起来。
+
+### 渲染机制
+
+渲染模块在执行过程中会被划分为很多子阶段，输入的HTML 经过这些子阶段，最后输出像素。我们把这样的一个处理流程叫做**渲染流水线**，按照渲染的时间顺序，流水线可分为如下几个子阶段：**构建 DOM 树、样式计算、布局阶段、分层、绘制、分块、光栅化和合成**。
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glfhhuzrqbj30x20psq9c.jpg" alt="渲染流水线示意图" style="zoom:50%;" />
+
+1. 渲染进程将 **HTML 内容转换**为能够读懂的**DOM 树**结构。
+2. 渲染引擎将 **CSS 样式表转化为浏览器可以理解styleSheets**，计算出 DOM 节点的样式。
+3. 创建**布局树**，并计算元素的布局信息。
+4. 对布局树进行**分层**，并生成分层树。
+5. 为每个图层生成**绘制列表**，并将其提交到**合成线程**。
+6. 合成线程将**图层分成图块**，并在**光栅化线程池中将图块转换成位图**。
+7. 合成线程发送绘制图块命令**DrawQuad**给浏览器进程。
+8. 浏览器进程**根据 DrawQuad 消息生成页面**，并显示到显示器上。
+
+#### 构建 DOM 树
+
+浏览器无法直接理解和使用 HTML，所以需要将HTML 转换为浏览器能够理解的结构-DOM 树。
+
+![DOM树构建过程](https://tva1.sinaimg.cn/large/0081Kckwly1glf2f6rgm4j30wy0jcq8u.jpg)
+
+从图中可以看出，**构建 DOM 树的输入内容是一个非常简单的 HTML 文件，然后经由HTML 解析器解析，最终输出树状结构的 DOM**。
+
+在浏览器的开发者工具中打开控制台，输入`document`，会看到一个完整的DOM树结构，DOM 和 HTML 内容几乎是一样的，但是和 HTML 不同的是，**DOM 是保存在内存中树状结构**，**可以通过 JavaScript 来查询或修改其内容**。
+
+#### 样式计算（Recalculate Style）
+
+样式计算的目的是为了计算出 DOM 节点中每个元素的具体样式，在计算过程中需要遵守 **CSS 的继承和层叠**两个规则。这个阶段**最终输出的内容是每个 DOM 节点的样式，并被保存在 ComputedStyle 的结构内**。这个阶段大体可分为三步来完成。
+
+##### 1. 把 CSS 转换为浏览器能够理解的结构
+
+CSS 样式来源主要有三种：
+
+* 通过 link 引用的外部 CSS 文件
+* `<style>`标记内的 CSS
+* 元素的 style 属性内嵌的 CSS
+
+和 HTML 文件一样，浏览器也是无法直接理解这些纯文本的 CSS 样式，所以**当渲染引擎接收到 CSS 文本时，会执行一个转换操作，将 CSS 文本转换为浏览器可以理解的结构——styleSheets。**
+
+在浏览器控制台中输入`document.styleSheets`，就可以查看其结构：
+
+![](https://tva1.sinaimg.cn/large/0081Kckwly1glf2z40obgj31e40methc.jpg)
+
+##### 2. 转换样式表中的属性值，使其标准化
+
+在CSS 文本中有很多属性值，如 2em、blue、bold，这些类型数值不容易被渲染引擎理解，所以需要**将所有值转换为渲染引擎容易理解的、标准化的计算值，这个过程就是属性值标准化**。
+
+![标准化属性值](https://tva1.sinaimg.cn/large/0081Kckwly1glf31npkunj30vy0duqap.jpg)
+
+##### 3. 计算出 DOM 树中每个节点的具体样式
+
+**这就涉及到 CSS 的继承规则和层叠规则了**。CSS 继承就是每个 DOM 节点都包含有父节点的样式。如下示例：
+
+```css
+body { font-size: 20px }
+p {color:blue;}
+span  {display: none}
+div {font-weight: bold;color:red}
+div  p {color:green;}
+```
+
+此样式表最终应用到DOM节点和效果图如下：
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glf39p8emuj30uw0soajb.jpg" style="zoom:50%;" />
+
+打开 Chrome 的“开发者工具”，选择第一个“element”标签，再选择“style”子标签，你会看到如下界面：
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glf3k0ih0kj30u00v9to3.jpg" alt="样式的继承过程界面" style="zoom:50%;" />
+
+> **UserAgent 样式**，它是浏览器提供的一组默认样式，如果你不提供任何样式，默认使用的就是 UserAgent样式。
+
+样式计算过程中的第二个规则是**样式层叠**。**层叠是 CSS 的一个基本特征，它是一个定义了如何合并来自多个源的属性值的算法**。它在 CSS 处于核心地位，CSS 的全称“层叠样式表”正是强调了这一点。
+
+如果想了解每个 DOM 元素**最终的计算样式**，可以打开 Chrome 的“开发者工具”，选择第一个“element”标签，然后再选择“Computed”子标签，红框中是标签的ComputedStyle 的值，如下图：
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glffd5fcn1j31080todq6.jpg" alt="DOM元素最终计算的样式" style="zoom:50%;" />
+
+#### 布局阶段（Layout）
+
+有了DOM 树和 DOM 树中元素的样式，还不能显示页面，需要知道DOM元素的几何位置信息，计算出 DOM 树中可见元素的几何位置，我们把这个计算过程叫做布局。
+
+Chrome 在布局阶段需要完成两个任务：**创建布局树和布局计算。**
+
+##### 1. 创建布局树
+
+在 DOM 树中还含有很多不可见的元素，比如 head 标签，还有使用了display:none 属性的元素。所以**在显示之前，我们还要额外地构建一棵只包含可见元素布局树**。
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glffqt27fgj30ub0u015t.jpg" alt="布局树构造过程示意图" style="zoom:50%;" />
+
+从图中可以看出，DOM树种所有不可见的节点都没有包含到布局树中。
+
+##### 2. 布局计算
+
+计算布局树节点的坐标位置。
+
+#### 分层（Layer）
+
+对于页面的一些复杂的效果，如一些复杂的 3D 变换、页面滚动，或者使用 z-indexing做 z 轴排序等，为了更加方便地实现这些效果，**渲染引擎还需要为特定的节点生成专用的图层，并生成一棵对应的图层树（LayerTree）。**
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glfggskvzkj30y00nadls.jpg" alt="布局树和图层树的关系" style="zoom:50%;" />
+
+通常情况下，并不是布局树的每个节点都包含一个图层，如果一个节点没有对应的层，那么这个节点就从属于父节点的图层。
+
+那么需要满足什么条件，渲染引擎才会为特定的节点创建新的层呢？通常满足下面两点中任意一点的元素就可以被提升为单独的一个图层。
+
+* 第一点，拥有层叠上下文属性的元素会被提升为单独的一层。
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glfgo6uq98j30vo0kuwgb.jpg" alt="层叠上下文示意图" style="zoom:50%;" />
+
+​	明确定位属性的元素、定义透明属性的元素、使用 CSS 滤镜的	元素等，都拥有层叠上下文属性。
+
+* 第二点，需要剪裁（clip）的地方也会被创建为图层。
+
+#### 图层绘制（Paint）
+
+渲染引擎实现图层的绘制是会把一个图层的绘制拆分成很多小的绘制指令，然后再把这些指令按照顺序组成一个待绘制列表。
+
+#### 栅格化（raster）操作
+
+绘制列表只是用来记录绘制顺序和绘制指令的列表，而实际上绘制操作是由渲染引擎中的合成线程来完成的。当图层的绘制列表准备好之后，主线程会把该绘制列表提交（commit）给合成线程，**合成线程会将图层划分为图块（tile）**。
+
+然后**合成线程会按照视口附近的图块来优先生成位图，实际生成位图的操作是由栅格化来执行的。所谓栅格化，是指将图块转换为位图。**而图块是栅格化执行的最小单位。渲染进程维护了一个栅格化的线程池，所有的图块栅格化都是在线程池内执行的。
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glfhb49w70j30xk0mo43n.jpg" alt="渲染进程" style="zoom:50%;" />
+
+
+
+> **视口（ViewPort）**：屏幕上页面的可见区域
+>
+> 在有些情况下，有的图层可以很大，比如有的页面你使用滚动条要滚动好久才能滚动到底部，但是通过视口，用户只能看到页面的很小一部分，所以在这种情况下，要绘制出所有图层内容的话，就会产生太大的开销，而且也没有必要。
+>
+> 基于这个原因，**合成线程会将图层划分为图块（tile）**，这些图块的大小通常是 256x256或者 512x512。
+
+通常，栅格化过程都会使用 GPU 来加速生成，使用 GPU 生成位图的过程叫快速栅格化，或者 GPU 栅格化，生成的位图被保存在 GPU 内存中。
+
+GPU 操作是运行在 GPU 进程中，如果栅格化操作使用了 GPU，那么最终生成位图的操作是在 GPU 中完成的，这就涉及到了跨进程操作。
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glfhf5fjjsj30wy0s6gsj.jpg" alt="GPU栅格化" style="zoom:50%;" />
+
+从图中可以看出，渲染进程把生成图块的指令发送给 GPU，然后在 GPU 中执行生成图块的位图，并保存在 GPU 的内存中。
+
+#### 合成（draw quad）和显示（display）
+
+一旦所有图块都被光栅化，合成线程就会生成一个绘制图块的命令——“**DrawQuad**”，然后将该命令提交给浏览器进程。
+
+浏览器进程里面有一个叫 viz 的组件，用来接收合成线程发过来的 DrawQuad 命令，然后根据 DrawQuad 命令，将其页面内容绘制到内存中，最后再将内存显示在屏幕上。
+
+到这里，经过这一系列的阶段，编写好的 HTML、CSS、JavaScript 等文件，经过浏览器就会显示出漂亮的页面了。
+
+### 重排、重绘和合成
+
+#### 重排（更新了元素的几何属性）
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glfhndhyftj30v4092gp9.jpg" style="zoom:50%;" />
+
+从上图可以看出，如果通过 JavaScript 或者 CSS 修改元素的几何位置属性，例如改变元素的宽度、高度等，那么**浏览器会触发重新布局，解析之后的一系列子阶段，这个过程就叫重排**。而且，重排需要更新完整的渲染流水线，所以**开销也是最大的**。
+
+#### 重绘（更新元素的绘制属性）
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glfk3mg3dkj30wq08u787.jpg" style="zoom:50%;" />
+
+从图中可以看出，如果修改了元素的背景颜色，那么**布局阶段将不会被执行**，因为并没有引起几何位置的变换，所以就**直接进入了绘制阶段，然后执行之后的一系列子阶段，这个过程就叫重绘**。相较于重排操作，**重绘省去了布局和分层阶段**，所以**执行效率会比重排操作要高一些**。
+
+#### 合成
+
+如果**更改一个既不要布局也不要绘制的属性**，**渲染引擎将跳过布局和绘制，只执行后续的合成操作**，我们把这个过程叫做**合成**。
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1glfkb6d1i3j30x0088adp.jpg" style="zoom:50%;" />
+在上图中，使用CSS 的 transform 来实现动画效果，这可以避开重排和重绘阶段，直接在非主线程上执行合成动画操作。这样的效率是最高的，因为是在非主线程上合成，并没有占用主线程的资源，另外也避开了布局和绘制两个子阶段，所以相对于重绘和重排，**合成能大大提升绘制效率**。
+
