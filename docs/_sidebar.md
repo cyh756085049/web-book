@@ -26,6 +26,7 @@
 
 * [浏览器原理及实践](Chrome/)
     * [宏观视觉下的浏览器](Chrome/brower)
+    * [浏览器中的JavaScript执行机制](Chrome/jsRun)
 
 * [TypeScript](typescript/TypeScript)
 
