@@ -424,3 +424,177 @@ console.log(bar.getName())
 
 所以在使用闭包的时候，要尽量注意一个原则：**如果该闭包会一直使用，那么它可以作为全局变量而存在；但如果使用频率不高，而且占用内存又比较大的话，那就尽量让它成为一个局部变量。**
 
+## this
+
+> 从JavaScript执行上下文的视角看待this
+
+在执行上下文中包含了四种环境，分别是：**变量环境、词法环境、外部环境和this**，this 也是和执行上下文绑定的，也就是说每个执行上下文中都有一个this。
+
+执行上下文主要分为三种，分别是：**全局执行上下文、函数执行上下文和 eval 执行上下文**，所以对应的 this 也只有这三种：全局执行上下文中的 this、函数中的 this 和 eval 中的 this。
+
+> 1. 当函数作为对象的方法调用时，函数中的 this 就是该对象；
+> 2. 当函数被正常调用时，在严格模式下，this 值是 undefined，非严格模式下 this 指向的是全局对象 window；
+> 3. 嵌套函数中的 this 不会继承外层函数的 this 值。
+> 4. 箭头函数没有自己的执行上下文，所以箭头函数的this 就是它外层函数的 this。
+
+### 全局执行上下文中的 this
+
+我们可以在浏览器控制台输入`console.log(this)`来打印全局上下文中的this，输出的是window对象，因此，**全局只执行上下文中的this是指向window对象的**。这也是 this 和作用域链的唯一交点，作用域链的最底端包含了 window对象，全局执行上下文中的 this 也是指向 window 对象。
+
+### 函数执行上下文中的 this
+
+执行下面代码：
+
+```js
+function foo() {
+    console.log(this);
+}
+foo();
+```
+
+输出的值仍然是window对象，这说明在默认情况下调用一个函数，其执行上下文中的 this 也是指向 window 对象的。那如何设置执行上下文中的this来指向其他的对象呢？通常情况下，有下面三种方式来设置函数执行上下文中的 this 值。
+
+####  通过函数的 call 方法设置
+
+可以通过函数的call方法来设置函数执行上下文的 this 指向，比如下面这段代码，我们就并没有直接调用 foo 函数，而是调用了 foo 的 call 方法，并将 bar 对象作为 call 方法的参数。
+
+```js
+let bar = {  
+    myName : " 极客邦 ",  
+    test1 : 1
+}
+function foo(){  
+    this.myName = " 极客时间 "
+}
+foo.call(bar)
+console.log(bar)
+console.log(myName)
+```
+
+![](https://i.loli.net/2020/12/15/fowqmDxaNTyRKsc.png)
+
+执行代码后发现，foo 函数内部的 this 已经指向了 bar 对象，因为通过打印 bar 对象，可以看出 bar 的 myName 属性已经由“极客邦”变为“极客时间”了，同时在全局执行上下文中打印 myName，JavaScript 引擎提示该变量未定义。
+
+当然，除了 call 方法，你还可以使用bind和apply方法来设置函数执行上下文中的 this。
+
+#### 2. 通过对象调用方法设置
+
+要改变函数执行上下文中的 this 指向，除了通过函数的 call 方法来实现外，还可以通过对象调用的方式，比如下面这段代码：
+
+```js
+var myObj = {  
+    name : " 极客时间 " ,  
+    showThis: function(){    
+        console.log(this)  
+    }
+}
+myObj.showThis()
+```
+
+执行代码，输出的this是指向myObj的。![](https://i.loli.net/2020/12/15/xamMv6AZyQdNqRw.png)
+
+**结论**：**使用对象来调用其内部的一个方法，该方法的 this 是指向对象本身的**。
+
+如果我们改变一下调用方式，把 showThis 赋给一个全局对象，然后再调用该对象，代码如下所示：
+
+```js
+var myObj = {  
+    name : " 极客时间 " ,  
+    showThis: function(){
+        this.name = "极客邦"
+        console.log(this)  
+    }
+}
+var foo = myObj.showThis
+foo()
+```
+
+执行代码会发现，this又指向了全局window对象。
+
+##### 总结
+
+* **在全局环境中调用一个函数，函数内部的 this 指向的是全局变量 window。**
+* **通过一个对象来调用其内部的一个方法，该方法的执行上下文中的 this 指向对象本身。**
+
+#### 3. 通过构造函数中设置
+
+也可以像下面的示例代码这样设置构造函数中的 this：
+
+```js
+function CreateObj(){  
+    this.name = " 极客时间 "
+}
+var myObj = new CreateObj()
+```
+
+当执行 new CreateObj() 的时候，JavaScript 引擎做了如下四件事：
+
+* 首先**创建了一个空对象** tempObj；
+* 接着**调用 CreateObj.call 方法**，并将 tempObj 作为 call 方法的参数，这样当CreateObj 的执行上下文创建时，它的 this 就指向了 tempObj 对象；
+* 然后**执行 CreateObj 函数**，此时的 CreateObj 函数执行上下文中的 this 指向了tempObj 对象；
+* 最后返回 tempObj 对象。
+
+这样，我们就通过 new 关键字构建好了一个新对象，并且构造函数中的 this 其实就是新对象本身。
+
+### this 的设计缺陷以及应对方案
+
+#### 1. 嵌套函数中的 this 不会从外层函数中继承
+
+如下面代码：
+
+```js
+var myObj = {  
+    name : " 极客时间 " ,  
+    showThis: function(){    
+        console.log(this)  
+        function bar () {
+            console.log(this)
+        }
+        bar()
+    }
+}
+myObj.showThis()
+```
+
+执行代码后发现，函数 bar 中的 this 指向的是全局 window对象，而函数 showThis 中的 this 指向的是 myObj 对象。<img src="https://i.loli.net/2020/12/15/tCOzWgB6QJ4LKdS.png" />
+
+（1）这个问题可以通过如下方式来解决，比如在 showThis 函数中声明一个变量 self 用来保存 this，然后在 bar 函数中使用 self，代码如下所示：
+
+```js
+var myObj = {  
+    name : " 极客时间 " ,  
+    showThis: function(){    
+        var self = this
+        console.log(self)  
+        function bar () {
+            console.log(self)
+        }
+        bar()
+    }
+}
+myObj.showThis()
+```
+
+执行代码后发现，最终 myObj 中的 name 属性值变成了“极客邦”。其实，这个方法的的本质是**把 this 体系转换为了作用域的体系。**<img src="https://i.loli.net/2020/12/15/tCOzWgB6QJ4LKdS.png" style="zoom:50%;" />
+
+（2）也可以使用 ES6 中的箭头函数来解决这个问题，结合下面代码：
+
+```js
+var myObj = {  
+    name : " 极客时间 " ,  
+    showThis: function(){    
+        console.log(this)  
+        var bar = () =>{
+            console.log(this)
+        }
+        bar()
+    }
+}
+myObj.showThis()
+```
+
+执行代码输出结果同上。这是因为 ES6 中的箭头函数并不会创建其自身的执行上下文，所以箭头函数中的 this 取决于它的外部函数。
+
+#### 2. 普通函数中的 this 默认指向全局对象 window
+
+在默认情况下调用一个函数，其执行上下文中的 this 是默认指向全局对象 window 的。不过这个设计也是一种缺陷，因为在实际工作中，我们并不希望函数执行上下文中的 this默认指向全局对象，因为这样会打破数据的边界，造成一些误操作。如果要让函数执行上下文中的 this 指向某个对象，最好的方式是**通过 call 方法来显示调用**。
