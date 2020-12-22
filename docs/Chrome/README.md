@@ -14,7 +14,7 @@
 * 作用域链和闭包
 * this
 
-#### [Chrome V8原理](Chrome/)
+#### [Chrome V8原理](Chrome/V8)
 * 栈空间和堆空间
 * 垃圾回收
 * 编译器和解释器
