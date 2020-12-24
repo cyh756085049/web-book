@@ -28,6 +28,7 @@
     * [宏观视觉下的浏览器](Chrome/brower)
     * [浏览器中的JavaScript执行机制](Chrome/jsRun)
     * [Chrome V8原理](Chrome/V8)
+    * [浏览器中的页面循环系统](Chrome/circleSystem)
 
 * [TypeScript](typescript/TypeScript)
 
