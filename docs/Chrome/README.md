@@ -19,7 +19,7 @@
 * 垃圾回收
 * 编译器和解释器
 
-#### [浏览器中的页面循环系统](Chrome/)
+#### [浏览器中的页面循环系统](Chrome/circleSystem)
 * 消息队列和事件循环
 * WebAPI：setTimeout
 * WebAPI：XMLHttpRequest
