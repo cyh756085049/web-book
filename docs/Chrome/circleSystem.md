@@ -294,6 +294,193 @@ setTimeout(function() {
 setTimeout(MyObj.showName.bind(MyObj), 1000)
 ```
 
+## WebAPI：XMLHttpRequest
+
+> XMLHttpRequest是怎么实现的?
+
+在 XMLHttpRequest 出现之前，如果服务器数据有更新，依然需要重新刷新整个页面。而 **XMLHttpRequest 提供了从 Web 服务器获取数据的能力**，如果你想要更新某条数据，只需要通过 XMLHttpRequest 请求服务器提供的接口，就可以获取到服务器的数据，然后再操作 DOM 来更新页面内容，整个过程只需要更新网页的一部分就可以了，而不用像之前那样还得刷新整个页面，这样既有效率又不会打扰到用户。
+
+### 回调函数（Callback Function）VS 系统调用栈
+
+将一个函数作为参数传递给另外一个函数，那作为参数的这个函数就是回调函数。简化的代码如下所示：
+
+```js
+let callback = function() {
+  console.log('I am do homework');
+}
+function dowork(cb) {
+  console.log('start do work');
+  cb();
+  console.log('end do work');
+}
+dowork(callback);
+// start do work
+// I am do homework
+// end do work
+```
+
+在上面示例代码中，我们将一个匿名函数赋值给变量 callback，同时将 callback 作为参数传递给了 doWork() 函数，这时在函数 doWork() 中 callback 就是回调函数。
+
+上面的回调方法有个特点，就是**回调函数 callback 是在主函数 doWork 返回之前执行的，我们把这个回调过程称为同步回调**。
+
+下面看异步回调的例子：
+
+```js
+let callback = function() {
+  console.log('I am do homework');
+}
+function dowork(cb) {
+  console.log('start do work');
+  setTimeout(cb, 1000);
+  console.log('end do work');
+}
+dowork(callback);
+// start do work
+// end do work
+// I am do homework
+```
+
+在这个例子中，我们使用了 setTimeout 函数让 callback 在 doWork 函数执行结束后，又延时了 1 秒再执行，这次 callback 并没有在主函数 doWork 内部被调用，我们把这种回调函数在主函数外部执行的过程称为异步回调。
+
+**当循环系统在执行一个任务的时候，都要为这个任务维护一个系统调用栈**。这个系统调用栈类似于 JavaScript 的调用栈，只不过系统调用栈是Chromium 的开发语言 C++ 来维护的（其完整的调用栈信息你可以通过chrome://tracing/ 来抓取）。当然，也可以通过 Performance 来抓取它核心的调用信息，如下图所示：
+
+<img src="https://tva1.sinaimg.cn/large/0081Kckwly1gm9eq4bdimj313207u77t.jpg" style="zoom:50%;" />
+
+这幅图记录了一个 Parse HTML 的任务执行过程，其中黄色的条目表示执行 JavaScript 的过程，其他颜色的条目表示浏览器内部系统的执行过程。
+
+通过该图可以看出来，Parse HTML 任务在执行过程中会遇到一系列的子过程，比如在解析页面的过程中遇到了 JavaScript 脚本，那么就暂停解析过程去执行该脚本，等执行完成之后，再恢复解析过程。然后又遇到了样式表，这时候又开始解析样式表......直到整个任务执行完成。
+
+需要说明的是，整个 Parse HTML 是一个完整的任务，在执行过程中的脚本解析、样式表解析都是该任务的子过程，**其下拉的长条就是执行过程中调用栈的信息**。
+
+异步回调是指回调函数在主函数之外执行，一般有两种方式：
+
+* 一是把异步函数做成一个任务，添加到信息队列尾部；
+* 二是把异步函数添加到微任务队列中，这样就可以在当前任务的末尾处执行微任务了。
+
+### XMLHttpRequest 运作机制
+
+具体工作过程如下图所示：
+
+![](https://tva1.sinaimg.cn/large/0081Kckwly1gm9f152f4wj30xq0giahj.jpg)
+
+
+
+下面是一端利用 XMLHttpRequest 来请求数据的代码：
+
+```js
+function GetWebData(URL){    
+  /**     
+  * 1: 新建 XMLHttpRequest 请求对象     
+  */    
+  let xhr = new XMLHttpRequest()    
+  /**     
+  * 2: 注册相关事件回调处理函数     
+  */    
+  xhr.onreadystatechange = function () {        
+    switch(xhr.readyState){          
+      case 0: // 请求未初始化            
+        console.log(" 请求未初始化 ")            
+        break;          
+      case 1://OPENED            
+        console.log("OPENED")            
+        break;          
+      case 2://HEADERS_RECEIVED            
+        console.log("HEADERS_RECEIVED")            
+        break;          
+      case 3://LOADING              
+        console.log("LOADING")            
+        break;          
+      case 4://DONE            
+        if(this.status == 200||this.status == 304){                
+          console.log(this.responseText);                }            
+        console.log("DONE")            
+        break;        
+    }    
+  }    
+  xhr.ontimeout = function(e) { 
+    console.log('ontimeout') 
+  }    
+  xhr.onerror = function(e) { 
+    console.log('onerror') 
+  }    
+  /**     
+  * 3: 打开请求     
+  */    
+  xhr.open('Get', URL, true);// 创建一个 Get 请求, 采用异步
+  /**     
+  * 4: 配置参数     
+  */    
+  xhr.timeout = 3000 // 设置 xhr 请求的超时时间    
+  xhr.responseType = "text" // 设置响应返回的数据格式    
+  xhr.setRequestHeader("X_TEST","time.geekbang")    
+  /**     
+  * 5: 发送请求     
+  */    
+  xhr.send();
+}
+```
+
+结合上述代码和流程图，分析这段代码的执行。
+
+##### 第一步：创建 XMLHttpRequest 对象
+
+当执行到`let xhr = new XMLHttpRequest()`后，JavaScript 会创建一个`XMLHttpRequest` 对象`xhr`，用来执行实际的网络请求操作。
+
+##### 第二步：为 xhr 对象注册回调函数
+
+因为网络请求比较耗时，所以要注册回调函数，这样后台任务执行完成之后就会通过调用回调函数来告诉其执行结果。`XMLHttpRequest `的回调函数主要有下面几种：
+
+* `ontimeout`，用来监控超时请求，如果后台请求超时了，该函数会被调用；
+* `onerror`，用来监控出错信息，如果后台请求出错了，该函数会被调用；
+* `onreadystatechange`，用来监控后台请求过程中的状态，比如可以监控到 HTTP 头加载完成的消息、HTTP 响应体消息以及数据加载完成的消息等。
+
+##### 第三步：配置基础的请求信息
+
+注册好回调事件之后，接下来就需要配置基础的请求信息了，首先要通过 open 接口配置一些基础的请求信息，包括请求的地址、请求方法（是 get 还是 post）和请求方式（同步还是异步请求）。
+
+然后通过 xhr 内部属性类配置一些其他可选的请求信息，可以参考文中示例代码，我们通过`xhr.timeout = 3000`来配置超时时间，也就是说如果请求超过 3000 毫秒还没有响应，那么这次请求就被判断为失败了。
+
+还可以通过`xhr.responseType = "text"`来配置服务器返回的格式，将服务器返回的数据自动转换为自己想要的格式，如果将 responseType 的值设置为 json，那么系统会自动将服务器返回的数据转换为 JavaScript 对象格式。下面的图表是列出的一些返回类型的描述：
+
+![截屏2021-01-02 16.21.00](https://tva1.sinaimg.cn/large/0081Kckwly1gm9fclw9ylj30yk0i4ti2.jpg)
+
+如果还需要添加自己专用的请求头属性，可以通过 `xhr.setRequestHeader` 来添加。
+
+##### 第四步：发起请求
+
+一切准备就绪之后，就可以调用`xhr.send`来发起网络请求了。对照上面那张请求流程图，可以看到：**渲染进程会将请求发送给网络进程，然后网络进程负责资源的下载，等网络进程接收到数据之后，就会利用 IPC 来通知渲染进程；渲染进程接收到消息之后，会将xhr 的回调函数封装成任务并添加到消息队列中，等主线程循环系统执行到该任务的时候，就会根据相关的状态来调用对应的回调函数**。
+
+如果网络请求出错了，就会执行` xhr.onerror`；如果超时了，就会执行 `xhr.ontimeout`；如果是正常的数据接收，就会执行 `onreadystatechange` 来反馈相应的状态。
+
+这就是一个完整的 XMLHttpRequest 请求流程。
+
+### XMLHttpRequest 使用过程中的问题
+
+#### 1、跨域问题
+
+比如在极客邦的官网使用 XMLHttpRequest 请求极客时间的页面内容，由于极客邦的官网是www.geekbang.org，极客时间的官网是time.geekbang.org，它们不是同一个源，所以就涉及到了跨域（在 A 站点中去访问不同源的 B 站点的内容）。默认情况下，跨域请求是不被允许的，如下面代码：
+
+```js
+GetWebData('www.geekbang.org');
+```
+
+可以在控制台测试下。首先通过浏览器打开www.geekbang.org，然后打开控制台，在控制台输入以上示例代码，再执行，会看到请求被 Block 了。
+
+因为 www.geekbang.org 和 time.geekbang.com 不属于一个域，所以以上访问就属于跨域访问了，这次访问失败就是由于跨域问题导致的。
+
+#### 2、HTTPS混合内容问题
+
+HTTPS 混合内容是 HTTPS 页面中包含了不符合 HTTPS 安全要求的内容，比如包含了 HTTP 资源，通过 HTTP 加载的图像、视频、样式表、脚本等，都属于混合内容。
+
+通常，如果 HTTPS 请求页面中使用混合内容，浏览器会针对 HTTPS 混合内容显示警告，用来向用户表明此 HTTPS 页面包含不安全的资源。比如打开站点https://www.iteye.com/groups ，可以通过控制台看到混合内容的警告，参考下图
+
+![](https://tva1.sinaimg.cn/large/0081Kckwly1gm9fy4hmanj30yq0aigwu.jpg)
+
+从上图可以看出，通过 HTML 文件加载的混合资源，虽然给出警告，但大部分类型还是能加载的。而使用 XMLHttpRequest 请求时，浏览器认为这种请求可能是攻击者发起的，会阻止此类危险的请求。比如我通过浏览器打开地址 https://www.iteye.com/groups，然后通过控制台，使用 XMLHttpRequest 来请求 http://img-ads.csdn.net/2018/201811150919211586.jpg ，这时候请求就会报错，出错信息如下图所示：
+
+![](https://tva1.sinaimg.cn/large/0081Kckwly1gm9fy052mgj30yg0fytfo.jpg)
+
+
 
 
 
