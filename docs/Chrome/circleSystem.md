@@ -610,6 +610,179 @@ setTimeout 函数触发的回调函数都是宏任务，如图中，左右两个
 
 综上所述， **MutationObserver 采用了“异步 + 微任务”的策略**。**通过异步操作解决了同步操作的性能问题；通过微任务解决了实时性的问题。**
 
+## Promise
+
+> 使用Promise，告别回调函数
+
+### 出现的原因
+
+在事件循环系统中，页面中任务都是执行在主线程之上的，相对于页面来说，主线程就是它整个的世界，所以在执行一项耗时的任务时，比如下载网络文件任务、获取摄像头等设备信息任务，这些任务都会放到页面主线程之外的进程或者线程中去执行，这样就避免了耗时任务“霸占”页面主线程的情况。你可以结合下图来看看这个处理过程：
+
+<img src="https://tva1.sinaimg.cn/large/008eGmZEly1gmpykhfml8j30vc0nq0zy.jpg" style="zoom:50%;" />
+
+上图展示的是一个标准的**异步编程模型**，页面主线程发起了一个耗时的任务，并将任务交给另外一个进程去处理，这时页面主线程会继续执行消息队列中的任务。等该进程处理完这个任务后，会将该任务添加到渲染进程的消息队列中，并排队等待循环系统的处理。排队结束之后，循环系统会取出消息队列中的任务进行处理，并触发相关的回调操作。这就是页面编程的一大特点：**异步回调。**
+
+**问题一**：页面编程异步回调：当多次回调后会导致**代码逻辑不连续，不线性**，不符合人的直觉。可以通过**封装异步代码**，让处理流程变得线性。如下图：
+
+<img src="https://tva1.sinaimg.cn/large/008eGmZEly1gmpxguyso6j30w60g8q6h.jpg" style="zoom:50%;" />
+
+**问题二**：但当代码中嵌套了太多的回调函数就容易让自己陷入**回调地狱**。总结原因有以下两点：
+
+* 第一是**嵌套调用**，下面的任务依赖上个任务的请求结果，并在上个任务的回调函数内部执行新的业务逻辑，这样当嵌套层次多了之后，代码的可读性就变得非常差了。
+* 第二是**任务的不确定性**，执行每个任务都有两种可能的结果（成功或者失败），所以体现在代码中就需要对每个任务的执行结果做两次判断，这种对每个任务都要进行一次额外的错误处理的方式，明显增加了代码的混乱程度。
+
+因此，为了解决上面的两个问题，即：一是消灭嵌套调用；二是合并多个任务的错误处理。Promise出现。
+
+### Promise
+
+##### 1、解决嵌套回调问题
+
+产生嵌套函数的一个主要原因是在发起任务请求时会带上回调函数，这样当任务处理结束之后，下个任务就只能在回调函数中来处理了。
+
+Promise 主要通过下面两步解决嵌套回调问题的。
+
+首先，**Promise 实现了回调函数的延时绑定**。回调函数的延时绑定在代码上体现就是先创建 Promise 对象 p，通过 Promise 的构造函数 executor 来执行业务逻辑；创建好Promise 对象 p 之后，再使用 p.then 来设置回调函数。示范代码如下：
+
+```js
+// 创建 Promise 对象 p，并在 executor 函数中执行业务逻辑
+function executor(resolve, reject){
+  resolve(100);
+}
+let p = new Promise(executor);
+// p延迟绑定回调函数 onResolve 
+function onResolve(value){
+  console.log(value);
+}
+p.then(onResolve);
+```
+
+其次，需要将回调函数 onResolve 的返回值穿透到最外层。因为我们会根据 onResolve函数的传入值来决定创建什么类型的 Promise 任务，创建好的 Promise 对象需要返回到最外层，这样就可以摆脱嵌套循环了。你可以先看下面的代码：
+
+<img src="https://tva1.sinaimg.cn/large/008eGmZEly1gmpxtbr2f5j30vk0oygtp.jpg" style="zoom:50%;" />
+
+现在我们知道了 Promise 通过回调函数延迟绑定和回调函数返回值穿透的技术，解决了循环嵌套。
+
+##### 2、处理异常错误问题
+
+如下面代码所示：
+
+```js
+function executor(resolve, reject) {    
+  let rand = Math.random();    
+  console.log(1)    
+  console.log(rand)    
+  if (rand > 0.5)        
+    resolve()    
+  else        
+    reject()
+}
+var p0 = new Promise(executor);
+var p1 = p0.then((value) => {    
+  console.log("succeed-1")    
+  return new Promise(executor)
+})
+var p3 = p1.then((value) => {    
+  console.log("succeed-2")    
+  return new Promise(executor)
+})
+var p4 = p3.then((value) => {    
+  console.log("succeed-3")    
+  return new Promise(executor)
+})
+p4.catch((error) => {    
+  console.log("error")
+})
+console.log(2)
+```
+
+这段代码有四个 Promise 对象：p0～p4。无论哪个对象里面抛出异常，都可以通过最后一个对象 p4.catch 来捕获异常，通过这种方式可以将所有 Promise 对象的错误合并到一个函数来处理，这样就解决了每个任务都需要单独处理异常的问题。
+
+> 之所以可以使用最后一个对象来捕获所有异常，是因为 Promise 对象的错误具有“冒泡”性质，会一直向后传递，直到被 onReject 函数处理或 catch 语句捕获为止。具备了这样“冒泡”的特性后，就不需要在每个 Promise 对象中单独捕获异常了。
+
+### Promise 与微任务
+
+如下方代码所示：
+
+```js
+function executor(resolve, reject) {    
+  resolve(100)
+}
+let demo = new Promise(executor)
+function onResolve(value){    
+  console.log(value)
+}
+demo.then(onResolve)
+```
+
+对于上面这段代码，我们需要重点关注下它的执行顺序。
+
+首先执行 new Promise 时，Promise 的构造函数会被执行，不过由于 Promise 是 V8 引擎提供的，所以暂时看不到 Promise 构造函数的细节。
+
+接下来，Promise 的构造函数会调用 Promise 的参数 executor 函数。然后在 executor中执行了 resolve，resolve 函数也是在 V8 内部实现的，那么 resolve 函数到底做了什么呢？我们知道，执行 resolve 函数，会触发 demo.then 设置的回调函数 onResolve，所以可以推测，resolve 函数内部调用了通过 demo.then 设置的 onResolve 函数。
+
+不过这里需要注意一下，由于 Promise 采用了回调函数延迟绑定技术，所以在执行resolve 函数的时候，回调函数还没有绑定，那么只能推迟回调函数的执行。
+
+接下来，模拟实现一个 Promise，我们会实现它的构造函数、resolve 方法以及 then 方法，以方便看清楚 Promise 的背后都发生了什么。这里我们就把这个对象称为 Bromise，下面就是 Bromise 的实现代码：
+
+```js
+function Bromise(executor) {    
+  var onResolve_ = null    
+  var onReject_ = null     
+  // 模拟实现 resolve 和 then，暂不支持 rejcet    
+  this.then = function (onResolve, onReject) {
+    onResolve_ = onResolve    
+  };    
+  function resolve(value) {          
+    //setTimeout(()=>{            
+    onResolve_(value)           
+    // },0)    
+  }    
+  executor(resolve, null);
+}
+```
+
+观察上面这段代码，我们实现了自己的构造函数、resolve、then 方法。接下来我们使用Bromise 来实现我们的业务代码，实现后的代码如下所示
+
+```js
+function executor(resolve, reject) {    
+  resolve(100)
+}
+// 将 Promise 改成我们自己的 Bromsie
+let demo = new Bromise(executor)
+function onResolve(value){
+  console.log(value)
+}
+demo.then(onResolve)
+```
+
+执行这段代码，我们发现执行出错，输出的内容是：
+
+```js
+Uncaught TypeError: onResolve_ is not a function    
+		at resolve (<anonymous>:10:13)    
+		at executor (<anonymous>:17:5)    
+		at new Bromise (<anonymous>:13:5)    
+		at <anonymous>:19:12
+```
+
+之所以出现这个错误，是由于 Bromise 的延迟绑定导致的，在调用到 onResolve_ 函数的时候，Bromise.then 还没有执行，所以执行上述代码的时候，当然会报“onResolve_ isnot a function“的错误了。
+
+也正是因为此，我们要改造 Bromise 中的 resolve 方法，让 resolve 延迟调用onResolve_。
+
+要让 resolve 中的 onResolve_ 函数延后执行，可以在 resolve 函数里面加上一个定时器，让其延时执行 onResolve_ 函数，你可以参考下面改造后的代码：
+
+```js
+function resolve(value) {          
+    setTimeout(()=>{            
+    	onResolve_(value)           
+    },0)  
+```
+
+上面采用了定时器来推迟 onResolve 的执行，不过使用定时器的效率并不是太高，好在我们有微任务，所以 Promise 又把这个定时器改造成了微任务了，这样既可以让onResolve_ 延时被调用，又提升了代码的执行效率。这就是 Promise 中使用微任务的原由了。
+
+> 1. Promise 中为什么要引入微任务？
+> 2. Promise 中是如何实现回调函数返回值穿透的？
+> 3. Promise 出错后，是怎么通过“冒泡”传递给最后那个捕获异常的函数？
 
 
 
