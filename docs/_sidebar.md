@@ -16,6 +16,10 @@
         * [数学](JavaScript/math/mathCode)
         * [日期](JavaScript/date/dateCode)
         * [存储](JavaScript/storage/storageCode)
+        * [对象](JavaScript/object/objectCode)
+        * [数组](JavaScript/array/arrayCode)
+        * [Promise](JavaScript/promise/promiseCode)
+        * [其他](JavaScript/other/otherCode)
 
 * [Vue](vue/)
     <!-- * [Vue 底层原理](Vue/Vue) -->
