@@ -69,4 +69,5 @@
 * [调试技巧](Power/)
     * [Chrome开发调试](Power/ChromePower)
     * [提高效率的软件清单](Power/software)
+    * [Linux常用命令行快捷键](Power/linuxCommand)
 
