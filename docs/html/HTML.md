@@ -313,7 +313,7 @@ HTML4.01里面有两大种规范，每大种规范里面又各有3种小规范�
 - import 是 CSS2.1 提出的，只在 IE5 以上才能被识别，而 link 是 XHTML 标签，无兼容问题;
 - link 支持使用 js 控制 DOM 去改变样式，而@import 不支持;
 
-## 如何实现浏览器内多个标签页之间的通信? (阿里)
+## 如何实现浏览器内多个标签页之间的通信?
 
 - WebSocket、SharedWorker；
 - 也可以调用 localstorge、cookies 等本地存储方式；
@@ -324,14 +324,14 @@ localstorge 另一个浏览上下文里被添加、修改或删除时，它都�
 
 注意 quirks：Safari 在无痕模式下设置 localstorge 值时会抛出 QuotaExceededError 的异常；
 
-## webSocket 如何兼容低浏览器？(阿里)
+## webSocket 如何兼容低浏览器？
 
 - Adobe Flash Socket 、
 - ActiveX HTMLFile (IE) 、
 - 基于 multipart 编码发送 XHR 、
 - 基于长轮询的 XHR
 
-## title 与 h1 的区别、b 与 strong 的区别、i 与 em 的区别？
+## title 与 h1、b 与 strong、i 与 em 的区别？
 
 - title 属性没有明确意义只表示是个标题，H1 则表示层次明确的标题，对页面信息的抓取也有很大的影响；
 - strong 是标明重点内容，有语气加强的含义，使用阅读设备阅读网络时：strong 会重读，而 b 是展示强调内容。
@@ -454,7 +454,7 @@ label 标签来定义表单控制间的关系,当用户选择该标签时，浏�
 
 在移动端开发中，某些机型上使用 click 事件会延迟 300ms 才执行，这样影响了用户体验。 解决方法： 引入[fastclick.js](https://www.jianshu.com/p/05b142d84780)。
 
-#### innerHTML和innerText的区别
+## innerHTML和innerText的区别
 
 - value：标签的value属性。
 
@@ -543,6 +543,6 @@ DOM ready：（也叫DOMContentLoaded ），在dom树构建完成后触发；
 前者：在DOM文档结构准备完毕后就可以对DOM进行操作；
  后者：当页面完全加载后（整个document文档包括图片、javascript文件、CSS文件等外部资源)，就会触发window上面的load事件。
 
-##  原生js实现一个事件绑定和一个事件解绑的函数。 
+##  原生js实现一个事件绑定和一个事件解绑的函数 
 
 ![image-20200930134429886](https://tva1.sinaimg.cn/large/007S8ZIlly1gj8mkp1wwsj30xw09aab8.jpg)

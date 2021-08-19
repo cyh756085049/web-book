@@ -24,7 +24,7 @@
 * [Vue](vue/)
     <!-- * [Vue 底层原理](Vue/Vue) -->
     * [Vue 源码解析](vue/vue)
-    * [Vue 常见手撕代码](vue/)
+    <!-- * [Vue 常见手撕代码](vue/) -->
 
 * [Web 安全](web/web)
 
@@ -66,7 +66,7 @@
 
 * [面试中常问到的区别](faceDiff)
 
-* [调试技巧](Power/)
+* [学习资源及工具](Power/)
     * [Chrome开发调试](Power/ChromePower)
     * [提高效率的软件清单](Power/software)
     * [Linux常用命令行快捷键](Power/linuxCommand)

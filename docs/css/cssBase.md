@@ -108,7 +108,7 @@ box-sizing: border-box;
 	element.currentStyle.width/height;
 ```
 
-和方式二相同，但这种方式只有IE独有。获取到的即时运行完之后的宽高（三种css样式都可以获取）。
+和方式二相同，但这种方式只有IE独有。获取到的即是运行完之后的宽高（三种css样式都可以获取）。
 
 #### 方式四
 
@@ -127,56 +127,6 @@ box-sizing: border-box;
 > 如果不在标准流，比如盒子都浮动了，那么两个盒子之间是没有margin重叠的现象的。
 
 **margin这个属性，本质上描述的是兄弟和兄弟之间的距离； 最好不要用这个marign表达父子之间的距离。**如果要表达父子之间的距离，我们一定要善于使用父亲的padding，而不是儿子的margin。
-
-### BFC（边距重叠解决方案）
-
-BFC（Block Formatting Context）：**块级格式化上下文**。你可以把它理解成一个独立的区域。另外还有个概念叫IFC。不过，BFC问得更多。
-
-#### BFC 的原理/BFC的布局规则【非常重要】
-
-BFC 的原理，其实也就是 BFC 的渲染规则。包括：
-
-（1）BFC **内部的**子元素，在垂直方向，**边距会发生重叠**。
-
-（2）BFC在页面中是独立的容器，外面的元素不会影响里面的元素，反之亦然。（稍后看`举例1`）
-
-（3）**BFC区域不与旁边的`float box`区域重叠**。（可以用来清除浮动带来的影响）。（稍后看`举例2`）
-
-（4）计算BFC的高度时，浮动的子元素也参与计算。（稍后看`举例3`）
-
-#### 如何生成BFC
-
-有以下几种方法：
-
-- 方法1：overflow: 不为visible，可以让属性是 hidden、auto。【最常用】
-- 方法2：浮动中：float的属性值不为none。意思是，只要设置了浮动，当前元素就创建了BFC。
-- 方法3：定位中：只要position的值不是 static或者是relative即可，可以是`absolute`或`fixed`，也就生成了一个BFC。
-- 方法4：display为inline-block, table-cell, table-caption, flex, inline-flex
-
-#### BFC 是什么
-
-
-overflow:hidden ：取消父子 margin 合并。 （另一种推荐做法：`padding-top: 0.1px;`）
-
-
-#### 如何清除浮动
-
-（1）overflow: hidden
-
-（2）.clearfix 清除浮动写在父元素身上
-
-```css
-.clearfix::after {
-  content: '';
-  display: block;
-  clear: both;
-}
-
-/* 兼容 IE */
-.clearfix {
-  zoom: 1;
-}
-```
 
 ## 定位方式及其区别（文档流）
 ### css定位
@@ -461,6 +411,17 @@ BFC（Block Formatting Context）：**块级格式化上下文**。是Web页面�
 12. 网格元素（display为 grid 或 inline-grid 元素的直接子元素） 
 13. 多列容器（元素的 column-count 或 column-width 不为 auto，包括 column-count 为 1） 
 14. column-span 为 all 的元素始终会创建一个新的BFC，即使该元素没有包裹在一个多列容器中（标准变更，Chrome bug）。
+
+### BFC 的原理/BFC的布局规则【非常重要】
+
+BFC 的原理，其实也就是 BFC 的渲染规则。包括：
+
+（1）BFC **内部的**子元素，在垂直方向，**边距会发生重叠**。
+
+（2）BFC在页面中是独立的容器，外面的元素不会影响里面的元素，反之亦然。
+
+（3）**BFC区域不与旁边的`float box`区域重叠**。（可以用来清除浮动带来的影响）。
+（4）计算BFC的高度时，浮动的子元素也参与计算。
 
 ### BFC常见的应用
 

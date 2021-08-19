@@ -1,4 +1,4 @@
-## 优秀的资源网站
+#### 优秀的资源网站
 
 * ##### [爱达杂货铺](https://adzhp.cn/)
 
@@ -12,7 +12,7 @@
 
   ![Macwk](https://tva1.sinaimg.cn/large/0081Kckwly1gkgs3ac555j31iw0u01bv.jpg)
 
-* ##### 各类网站软件收集
+#### 各类网站软件收集
 
   [CopyTranslator](https://copytranslator.github.io/) 
 
