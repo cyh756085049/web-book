@@ -1730,6 +1730,218 @@ function hasPrototypeProperty(object, name) {
 * 它省略了为构造函数传递初始化参数这一环节，结果所有实例在默认情况下都将取得相同的属性值。
 * **最大问题是由其共享的本性所导致的**。
 
+## ES6 对象的扩展
+
+### 属性及方法的简洁表示法
+
+当属性名/方法名和变量名一致时，ES6允许在大括号里直接写入变量和函数，作为对象的属性和方法。
+
+#### 属性简写
+
+属性名就是变量名, 属性值就是变量值
+
+```js
+// 示例1
+const name = 'ramona';
+const foo = { name };  
+// 等同于
+const foo = { name: name };
+
+// 示例2
+function f(x, y) {
+  return {x, y};
+}
+// 等同于
+function f(x, y) {
+  return {x: x, y: y};
+}
+f(1, 2); // Object {x: 1, y: 2}
+```
+
+#### 方法简写
+
+```js
+// 示例1
+const fn = {
+  method() {
+    return 'hello world';
+  }
+}
+// 等同于
+const fn = {
+  method: function() {
+     return 'hello world';
+  }
+}
+
+// 示例2
+let birth = '2000/01/01';
+const Person = {
+  name: '张三', 
+  birth, //等同于birth: birth
+  hello() { console.log('我的名字是', this.name); }  // 等同于hello: function ()...
+};
+```
+
+#### 应用场景
+
+1、函数的返回值
+
+```js
+function getPoint() {
+  const x = 1;
+  const y = 10;
+  return {x, y};
+}
+getPoint(); // {x:1, y:10}
+```
+
+2、CommonJS 模块输出一组变量
+
+```js
+let ms = {};
+function getItem(key)  {
+  return key in ms ? ms[key] : nulll;
+}
+function setItem(key, value)  {
+  ms[key] = value;
+}
+function clear() {
+  ms = {};
+}
+module.exports = { getItem. setItem, clear };
+// 等同于
+module.exports = {
+  getItem: getItem,
+  setItem: setItem,
+  clear: clear
+};
+```
+
+3、属性的赋值器（setter）和取值器（getter）
+
+```js
+const cart = {
+  _wheels: 4,
+
+  get wheels () {
+    return this._wheels;
+  },
+
+  set wheels (value) {
+    if (value < this._wheels) {
+      throw new Error('数值太小了！');
+    }
+    this._wheels = value;
+  }
+}
+```
+
+4、打印对象
+
+```js
+let user = { name: 'lily' };
+let foo = { bar: 'bar' };
+console.log(user, foo); // {name: "test"} {bar: "baz"}
+console.log({user, bar}); // {user: {name: "test"}, foo: {bar: "baz"}}
+```
+
+> 注意📢：简写的对象方法不能用作构造函数。
+>
+> ```js
+> const obj = {
+>   f() {
+>     this.name = 'jack';
+>   }
+> };
+> new obj.f();  //Uncaught TypeError: obj.f is not a constructor
+> ```
+
+### 属性名表达式
+
+JavaScript 定义对象的属性，有两种方法。
+
+* 方法一：直接用标识符作为属性名。
+
+  ```js
+  obj.foo = true;
+  ```
+
+* 方法二：用表达式作为属性名，这时要将表达式放在方括号之内。
+
+  ```js
+  obj['a' + 'bc'] = 123;
+  ```
+
+使用字面量方式定义对象，在ES5中只能使用方式一。ES6 允许字面量定义对象时，用方法二（表达式）作为对象的属性名，即把表达式放在方括号内。
+
+```js
+let lastWord = 'last word';
+
+const a = {
+  'first word': 'hello',
+  [lastWord]: 'world'
+};
+
+a['first word'] // "hello"
+a[lastWord] // "world"
+a['last word'] // "world"
+```
+
+表达式还可以用来定义方法名。（了解）
+
+```js
+let obj = {
+  ['h' + 'ello']() {
+    return 'hi';
+  }
+};
+obj.hello() // hi
+```
+
+>注意📢：属性名表达式与简洁表示法，不能同时使用。
+>
+>```js
+>// 报错
+>const foo = 'bar';
+>const bar = 'abc';
+>const baz = { [foo] };
+>
+>// 正确
+>const foo = 'bar';
+>const baz = { [foo]: 'abc'};
+>```
+>
+>属性名表达式如果是一个对象，默认情况下会自动将对象转为字符串`[object Object]`，这一点要特别小心。
+>
+>```js
+>const keyA = {a: 1};
+>const keyB = {b: 2};
+>
+>const myObject = {
+>  [keyA]: 'valueA',
+>  [keyB]: 'valueB'
+>};
+>
+>myObject; // Object {[object Object]: "valueB"}
+>```
+>
+>
+
+### 方法的name属性
+
+函数的`name`属性，返回函数名。对象方法也是函数，因此也有`name`属性。
+
+```js
+const person = {
+  sayName() {
+    console.log('hello!');
+  },
+};
+
+person.sayName.name;   // "sayName"
+```
+
 ## `for-of`和`for-in`的区别
 
 #### 1、`for-of`
