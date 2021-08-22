@@ -1925,7 +1925,7 @@ obj.hello() // hi
 >
 >myObject; // Object {[object Object]: "valueB"}
 >```
->
+>[keyA]和[keyB]得到的都是[object Object]，所以[keyB]会把[keyA]覆盖掉，而myObject最后只有一个[object Object]属性。
 >
 
 ### 方法的name属性
@@ -1941,6 +1941,450 @@ const person = {
 
 person.sayName.name;   // "sayName"
 ```
+
+如果对象的方法使用了取值函数（`getter`）和存值函数（`setter`），则`name`属性不是在该方法上面，而是该方法的属性的描述对象的`get`和`set`属性上面，返回值是方法名前加上`get`和`set`。
+
+```js
+const obj = {
+  get foo() {},
+  set foo(x) {}
+};
+
+obj.foo.name; // TypeError: Cannot read property 'name' of undefined
+
+const descriptor = Object.getOwnPropertyDescriptor(obj, 'foo');
+descriptor;
+/**
+configurable: true
+enumerable: true
+get: ƒ foo()
+set: ƒ foo(x)
+**/
+
+descriptor.get.name; // "get foo"
+descriptor.set.name; // "set foo"
+```
+
+> 对象的每个属性都有一个描述对象（Descriptor），用来控制该属性的行为。`Object.getOwnPropertyDescriptor`方法可以获取该属性的描述对象。
+
+特殊情况:
+
+* `bind`方法创造的函数，`name`属性返回`bound`加上原函数的名字；
+
+* `Function`构造函数创造的函数，`name`属性返回`anonymous`。
+
+```js
+// bind方法示例
+var doSomething = function() {
+  // doSomething ...
+};
+doSomething.bind().name; // "bound doSomething"
+
+// Function示例
+(new Function()).name // "anonymous"
+```
+
+如果对象的方法是一个 Symbol 值，那么`name`属性返回的是这个 Symbol 值的描述。
+
+```js
+const key1 = Symbol('description');
+const key2 = Symbol();
+let obj = {
+  [key1]() {},
+  [key2]() {},
+};
+obj[key1].name // "[description]"
+obj[key2].name // ""
+```
+
+### 属性的可枚举性和遍历
+
+#### 属性可枚举性
+
+```js
+let obj = { foo: 123 };
+Object.getOwnPropertyDescriptor(obj, 'foo');
+//  {
+//    value: 123,
+//    writable: true,
+//    enumerable: true,
+//    configurable: true
+//  }
+```
+
+描述对象的`enumerable`属性，表示能否通过 for-in 循环返回属性,称为“可枚举性”，如果该属性为`false`，就表示某些操作会忽略当前属性。
+
+目前，有四个操作会忽略`enumerable`为`false`的属性。
+
+- `for...in`循环：只遍历对象自身的和**继承的**可枚举的属性。
+- `Object.keys()`：返回对象自身的所有可枚举的属性的键名。
+- `JSON.stringify()`：只串行化对象自身的可枚举的属性。
+- `Object.assign()`： 只拷贝对象自身的可枚举的属性。(ES6 新增)
+
+> 引入“可枚举”（`enumerable`）的目的：让某些属性可以规避掉`for...in`操作，不然所有内部属性和方法都会被遍历到。比如，对象原型的`toString`方法，以及数组的`length`属性，就通过“可枚举性”，从而避免被`for...in`遍历到。
+>
+> ```js
+> Object.getOwnPropertyDescriptor(Object.prototype, 'toString').enumerable; // false
+> 
+> Object.getOwnPropertyDescriptor([], 'length').enumerable; // false
+> ```
+>
+> `toString`和`length`属性的`enumerable`都是`false`，因此`for...in`不会遍历到这两个继承自原型的属性。
+>
+> ![image-20210822201852538](https://tva1.sinaimg.cn/large/008i3skNly1gtptzkz2dyj61880e0wgo02.jpg)
+
+ES6 规定，所有 Class 的原型的方法都是不可枚举的。
+
+```js
+Object.getOwnPropertyDescriptor(class {foo() {}}.prototype, 'foo').enumerable; // false
+```
+
+> 总的来说，操作中引入继承的属性会让问题复杂化，大多数时候，我们只关心对象自身的属性。所以，尽量不要用`for...in`循环，而用`Object.keys()`代替。
+
+#### 属性的遍历
+
+ES6 一共有 5 种方法可以遍历对象的属性。
+
+| 属性的遍历方法                        | 描述                                                         |
+| ------------------------------------- | ------------------------------------------------------------ |
+| **for...in**                          | 遍历对象自身的和继承的可枚举属性（不含 Symbol 属性）。       |
+| **Object.keys(obj)**                  | 返回一个数组，包括对象自身的所有可枚举属性（不含 Symbol 属性）的键名。 |
+| **Object.getOwnPropertyNames(obj)**   | 返回一个数组，包含对象自身的所有属性（不含 Symbol 属性，但是包括不可枚举属性）的键名。 |
+| **Object.getOwnPropertySymbols(obj)** | 返回一个数组，包含对象自身的所有 Symbol 属性的键名。         |
+| **Reflect.ownKeys(obj)**              | 返回一个数组，包含对象自身的（不含继承的）所有键名，不管键名是 Symbol 或字符串，也不管是否可枚举。 |
+
+以上的 5 种方法遍历对象的键名，都遵守同样的属性遍历的次序规则。
+
+- 首先遍历所有**数值键**，按照数值升序排列。
+- 其次遍历所有**字符串键**，按照加入时间升序排列。
+- 最后遍历所有 **Symbol 键**，按照加入时间升序排列。
+
+```js
+Reflect.ownKeys({ [Symbol()]:0, b:0, 10:0, 2:0, a:0 });
+// ['2', '10', 'b', 'a', Symbol()]
+```
+
+### super 关键字
+
+`this`关键字总是指向函数所在的当前对象，ES6 又新增了另一个类似的关键字`super`，**指向当前对象的原型对象**。
+
+JavaScript 引擎内部，`super.foo`等同于`Object.getPrototypeOf(this).foo`（属性）或`Object.getPrototypeOf(this).foo.call(this)`（方法）。
+
+```js
+const proto = {
+  x: 'hello',
+  foo() {
+    console.log(this.x);
+  },
+};
+
+const obj = {
+  x: 'world',
+  foo() {
+    super.foo();
+  },
+  find() {
+    return super.x;
+  }
+}
+
+Object.setPrototypeOf(obj, proto);
+// 当做问题
+obj.find(); // ? "hello"
+obj.foo() // ? "world"
+```
+
+（折叠）上面代码中，对象`obj.find()`方法之中，通过`super.x`引用了原型对象`proto`的`x`属性。`super.foo()`指向原型对象`proto`的`foo`方法，但是绑定的`this`却还是当前对象`obj`，因此输出的就是`world`。
+
+> 注意：`super`关键字表示原型对象时，只能用在对象的方法之中，用在其他地方都会报错。
+>
+> ```js
+> /**
+> 报错 Uncaught SyntaxError: 'super' keyword unexpected here
+> */
+> // 用在属性里面
+> const obj = {
+>   foo: super.foo
+> }
+> 
+> // 用在一个函数里面，然后赋值给foo属性
+> const obj = {
+>   foo: () => super.foo
+> }
+> 
+> // 用在一个函数里面，然后赋值给foo属性
+> const obj = {
+>   foo: function () {
+>     return super.foo
+>   }
+> }
+> 
+> // 正确✅ 对象方法的简写法
+> const obj = {
+>   find() {
+>     return super.foo;
+>   }
+> }
+> ```
+>
+> 
+
+### 对象的扩展运算符
+
+#### 解构赋值
+
+对象的解构赋值用于从一个对象取值，相当于将目标对象自身的所有可遍历的（enumerable）、但尚未被读取的属性，分配到指定的对象上面。所有的键和它们的值，都会拷贝到新对象上面。
+
+```js
+let { x, y, ...z } = { x: 1, y: 2, a: 3, b: 4 };
+x // 1
+y // 2
+z // { a: 3, b: 4 }
+```
+
+> **注意点**
+>
+> 1.由于解构赋值要求等号右边是一个对象，所以如果等号右边是`undefined`或`null`，就会报错，因为它们无法转为对象。
+>
+> ```js
+> let { ...z } = null; // Uncaught TypeError: Cannot destructure 'null' as it is null.
+> let { ...z } = undefined; // Uncaught TypeError: Cannot destructure 'undefined' as it is undefined.
+> ```
+>
+> 2.解构赋值必须是最后一个参数，否则会报错。
+>
+> ```js
+> let { ...x, y, z } = someObject; // Uncaught SyntaxError: Rest element must be last element
+> ```
+>
+> 3.解构赋值的拷贝是浅拷贝，即如果一个键的值是复合类型的值（数组、对象、函数）、那么解构赋值拷贝的是这个值的引用，而不是这个值的副本。(之前讲过)。
+>
+> ```js
+> let obj = { a: { b: 1 } };
+> let { ...x } = obj;
+> obj.a.b = 2;
+> x.a.b // 2
+> ```
+>
+> `x`是解构赋值所在的对象，拷贝了对象`obj`的`a`属性。`a`属性引用了一个对象，修改这个对象的值，会影响到解构赋值对它的引用。
+>
+> 4.扩展运算符的解构赋值，不能复制继承自原型对象的属性。
+>
+> ```js
+> let o1 = { a: 1 };
+> let o2 = { b: 2 };
+> o2.__proto__ = o1;
+> let { ...o3 } = o2;
+> o3 // { b: 2 }
+> o3.a // undefined
+> ```
+>
+> 对象`o3`复制了`o2`，但是只复制了`o2`自身的属性，没有复制它的原型对象`o1`的属性。
+>
+> ```js
+> const o = Object.create({ x: 1, y: 2 });
+> o.z = 3;
+> 
+> let { x, ...newObj } = o;
+> let { y, z } = newObj;
+> x // 1
+> y // undefined
+> z // 3
+> ```
+>
+> 变量`x`是单纯的解构赋值，所以可以读取对象`o`继承的属性；变量`y`和`z`是扩展运算符的解构赋值，只能读取对象`o`自身的属性，所以变量`z`可以赋值成功，变量`y`取不到值。ES6 规定，变量声明语句之中，如果使用解构赋值，扩展运算符后面必须是一个变量名，而不能是一个解构赋值表达式，所以上面代码引入了中间变量`newObj`，如果写成下面这样会报错。
+>
+> ```js
+> let { x, ...{ y, z } } = o;
+> // Uncaught SyntaxError: `...` must be followed by an identifier in declaration contexts
+> ```
+>
+> 
+
+##### 应用
+
+扩展某个函数的参数，引入其他操作。
+
+```js
+function baseFunction({ a, b }) {
+  // ...
+}
+function wrapperFunction({ x, y, ...restConfig }) {
+  // 使用 x 和 y 参数进行操作
+  // 其余参数传给原始函数
+  return baseFunction(restConfig);
+}
+```
+
+原始函数`baseFunction`接受`a`和`b`作为参数，函数`wrapperFunction`在`baseFunction`的基础上进行了扩展，能够接受多余的参数，并且保留原始函数的行为。(有点像Java中面向对象中的代理？)
+
+#### 扩展运算符
+
+1.对象的扩展运算符（`...`）用于取出参数对象的所有可遍历属性，拷贝到当前对象之中。
+
+```js
+let z = { a: 3, b: 4 };
+let n = { ...z };
+n // { a: 3, b: 4 }
+```
+
+> **注意点**
+>
+> (1).扩展运算符后面是数组，可获得对象（数组是特殊的对象）。
+>
+> ```js
+> let foo = { ...['a', 'b', 'c'] };
+> foo // {0: "a", 1: "b", 2: "c"}
+> ```
+>
+> (2)扩展运算符后面是一个空对象，则没有任何效果。
+>
+> ```js
+> {...{}, a: 1} // { a: 1 }
+> ```
+>
+> (3)扩展运算符后面不是对象，则会自动将其转为对象。
+>
+> ```JS
+> // 运算符后面的 value 是数字、布尔值、undefined、null，等同于 {...Object(value)}，返回空对象
+> {...1} // {} 
+> {...true} // {}
+> {...undefined} // {}
+> {...null} // {}
+> 
+> 
+> // 运算符后面的 value 是字符串，会自动转成一个类似数组的对象
+> {...'hello'} // {0: "h", 1: "e", 2: "l", 3: "l", 4: "o"}
+> ```
+>
+> 
+
+2.对象的扩展运算符等同于使用`Object.assign()`方法。
+
+```js
+const a = {x: 1, y: 2};
+let aClone = { ...a };
+// 等同于
+let aClone = Object.assign({}, a);
+```
+
+上例只是拷贝了对象实例的属性，如果想完整克隆一个对象，还拷贝对象原型的属性，可以采用下面的写法。
+
+```js
+let testObj = {x: 1, y: 2};
+const p = {
+  foo: 'foo', 
+  find() { 
+    return this.foo; 
+  }
+};
+Object.setPrototypeOf(testObj, p);
+testObj.__proto__; // {foo: "foo", find: ƒ}
+
+// 写法一
+const clone1 = {
+  __proto__: Object.getPrototypeOf(testObj),
+  ...testObj
+};
+clone1 // {_proto_: {…}, x: 1, y: 2}
+
+// 写法二
+const clone2 = Object.assign(
+  Object.create(Object.getPrototypeOf(testObj)),
+  testObj
+);
+
+// 写法三
+const clone3 = Object.create(
+  Object.getPrototypeOf(testObj),
+  Object.getOwnPropertyDescriptors(testObj)
+)
+```
+
+写法一的`__proto__`属性在非浏览器的环境不一定部署，因此推荐使用写法二和写法三。
+
+3.扩展运算符可以用于合并两个对象。
+
+```javascript
+const aObj = {x: 1};
+const bObj = {y: 2};
+let ab = { ...aObj, ...bObj };
+// 等同于
+let ab = Object.assign({}, aObj, bObj);
+```
+
+4.如果用户自定义的属性，放在扩展运算符后面，则扩展运算符内部的同名属性会被覆盖掉。
+
+```js
+const a = {x: 3};
+let aWithOverrides = { ...a, x: 1, y: 2 }; // {x: 1, y: 2} 
+// 等同于
+let aWithOverrides = { ...a, ...{ x: 1, y: 2 } };
+// 等同于
+let x = 1, y = 2, aWithOverrides = { ...a, x, y };
+// 等同于
+let aWithOverrides = Object.assign({}, a, { x: 1, y: 2 });
+```
+
+可应用于修改现有对象部分的属性。
+
+```js
+const previousVersion = {
+  name: 'old name',
+  age: 18
+}
+let newVersion = {
+  ...previousVersion,
+  name: 'new name' // Override the name property
+};
+// {name: "New Name", age: 18}
+```
+
+5.如果把自定义属性放在扩展运算符前面，就变成了设置新对象的默认属性值。
+
+```js
+const a = {x: 3};
+let aWithDefaults = { x: 1, y: 2, ...a }; // {x: 3, y: 2}
+// 等同于
+let aWithDefaults = Object.assign({}, { x: 1, y: 2 }, a);
+// 等同于
+let aWithDefaults = Object.assign({ x: 1, y: 2 }, a);
+
+```
+
+6.与数组的扩展运算符一样，对象的扩展运算符后面可以跟表达式。
+
+```js
+const d = 2;
+const obj = {
+  ...(d > 1 ? {a: 1} : {}),
+  b: 2,
+};
+// {a: 1, b: 2}
+```
+
+7.扩展运算符的参数对象之中，如果有取值函数`get`，这个函数是会执行的。
+
+```js
+let paramObj = {
+  get x() {
+    throw new Error('not throw yet');
+  }
+}
+
+let paramObj1 = {
+  get x() {
+    return 'hello';
+  }
+}
+
+let aWithXGetter = { ...paramObj }; // Uncaught Error: not throw yet at Object.get x [as x]
+let aWithXGetter1 = { ...paramObj1 }; // {x: 'hello'}
+```
+
+取值函数`get`在扩展`a`对象时会自动执行，导致报错。
+
+
 
 ## `for-of`和`for-in`的区别
 
