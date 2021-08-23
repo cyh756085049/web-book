@@ -2625,6 +2625,161 @@ d.c // "c"
 d.b // "b"
 d.a // "a"
 ```
+### `__proto__	`属性，Object.setPrototypeOf()，Object.getPrototypeOf() 
+
+#### `__proto__`属性
+
+用来读取或设置当前对象的原型对象（prototype）。目前，所有浏览器（包括 IE11）都部署了这个属性。该属性本质上是一个内部属性，最好不要使用。
+
+```js
+// es5 的写法
+const obj = {
+  method: function() { ... }
+};
+obj.__proto__ = someOtherObj;
+
+// es6 的写法
+var obj = Object.create(someOtherObj);
+obj.method = function() { ... };
+```
+
+`__proto__`调用的是`Object.prototype.__proto__`，具体实现如下。
+
+```js
+Object.defineProperty(Object.prototype, '__proto__', {
+  get() {
+    let _thisObj = Object(this);
+    return Object.getPrototypeOf(_thisObj);
+  },
+  set(proto) {
+    if (this === undefined || this === null) {
+      throw new TypeError();
+    }
+    if (!isObject(this)) {
+      return undefined;
+    }
+    if (!isObject(proto)) {
+      return undefined;
+    }
+    let status = Reflect.setPrototypeOf(this, proto);
+    if (!status) {
+      throw new TypeError();
+    }
+  },
+});
+
+function isObject(value) {
+  return Object(value) === value;
+}
+```
+
+如果一个对象本身部署了`__proto__`属性，该属性的值就是对象的原型。
+
+```js
+Object.getPrototypeOf({ __proto__: null }); // null
+```
+
+#### Object.setPrototypeOf() 
+
+**作用**：与`__proto__`相同，用来设置一个对象的原型对象（prototype），返回参数对象本身。它是 ES6 正式推荐的设置原型对象的方法。
+
+**语法**：`Object.setPrototypeOf(object, prototype);`
+
+```js
+// 示例1
+const o = Object.setPrototypeOf({}, null);
+// 方法等同于
+function setPrototypeOf(obj, proto) {
+  obj.__proto__ = proto;
+  return obj;
+}
+
+// 示例2
+let proto = {};
+let obj = { x: 10 };
+Object.setPrototypeOf(obj, proto);
+
+proto.y = 20;
+proto.z = 40;
+
+obj.x // 10
+obj.y // 20
+obj.z // 40
+// 将proto对象设为obj对象的原型，所以从obj对象可以读取proto对象的属性
+```
+
+> 注意点
+>
+> 1.如果第一个参数不是对象，会自动转为对象。但是由于返回的还是第一个参数，所以这个操作不会产生任何效果。
+>
+> ```js
+> Object.setPrototypeOf(1, {}) === 1 // true
+> Object.setPrototypeOf('foo', {}) === 'foo' // true
+> Object.setPrototypeOf(true, {}) === true // true
+> ```
+>
+> 2.由于`undefined`和`null`无法转为对象，所以如果第一个参数是`undefined`或`null`，就会报错。
+>
+> ```js
+> Object.setPrototypeOf(undefined, {})
+> // TypeError: Object.setPrototypeOf called on null or undefined
+> 
+> Object.setPrototypeOf(null, {})
+> // TypeError: Object.setPrototypeOf called on null or undefined
+> ```
+
+#### Object.getPrototypeOf()
+
+**作用**：该方法与`Object.setPrototypeOf`方法配套，用于读取一个对象的原型对象。
+
+**语法**：`Object.getPrototypeOf(obj);`
+
+```js
+function Rectangle() {
+  // ...
+}
+
+const rec = new Rectangle();
+
+Object.getPrototypeOf(rec) === Rectangle.prototype; // true
+
+Object.setPrototypeOf(rec, Object.prototype);
+Object.getPrototypeOf(rec) === Rectangle.prototype; // false
+```
+
+> 注意点
+>
+> 1.如果参数不是对象，会被自动转为对象。
+>
+> ```js
+> // 等同于 Object.getPrototypeOf(Number(1))
+> Object.getPrototypeOf(1);
+> // Number {[[PrimitiveValue]]: 0}
+> 
+> // 等同于 Object.getPrototypeOf(String('foo'))
+> Object.getPrototypeOf('foo');
+> // String {length: 0, [[PrimitiveValue]]: ""}
+> 
+> // 等同于 Object.getPrototypeOf(Boolean(true))
+> Object.getPrototypeOf(true);
+> // Boolean {[[PrimitiveValue]]: false}
+> 
+> Object.getPrototypeOf(1) === Number.prototype; // true
+> Object.getPrototypeOf('foo') === String.prototype; // true
+> Object.getPrototypeOf(true) === Boolean.prototype; // true
+> ```
+>
+> 2.如果参数是`undefined`或`null`，它们无法转为对象，所以会报错。
+>
+> ```js
+> Object.getPrototypeOf(null);
+> // TypeError: Cannot convert undefined or null to object
+> 
+> Object.getPrototypeOf(undefined);
+> // TypeError: Cannot convert undefined or null to object
+> ```
+>
+> 
 =======
 ##### 应用
 
