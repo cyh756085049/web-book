@@ -1942,6 +1942,432 @@ const person = {
 person.sayName.name;   // "sayName"
 ```
 
+## 对象的新增方法
+
+### Object.is() 比较两个值是否相等
+
+
+
+ES5 中比较两个值是否相等，只有两个运算符。
+
+* 相等运算符（`==`），但会自动转换数据类型。
+* 严格相等运算符（`===`），但`NaN`不等于自身，以及`+0`等于`-0`。
+
+ES6 提出“Same-value equality”（同值相等）算法，即`Object.is`方法，用来比较两个值是否严格想等，与（`===`）行为基本一致。但是`+0`不等于`-0`，`NaN`等于自身。
+
+```js
+Object.is('foo', 'foo'); // true
+Object.is({}, {}); // false  ? 
+
++0 === -0 //true
+NaN === NaN // false
+
+Object.is(+0, -0) // false
+Object.is(NaN, NaN) // true
+```
+
+ES5可通过以下代码，部署`Object.is`。
+
+```js
+Object.defineProperty(Object, 'is', {
+  value: function(x, y) {
+    if (x === y) {
+      // 针对 +0 不等于 -0 的情况,返回 false
+      return x !== 0 || 1 / x === 1 / y;
+    }
+    // 针对 NaN 的情况
+    return x !== x && y !== y;
+  },
+  configurable: true,
+  enumerable: false;
+  writable: true
+});
+```
+
+### Object.assign() 对象的合并
+
+**作用**：将源对象（source）的所有可枚举属性，复制到目标对象（target）。
+
+**语法**：`Object.assign(target, source, ...)`方法的第一个参数是目标对象，后面的参数都是源对象。
+
+```js
+const target = { a: 1 };
+
+const source1 = { b: 2 };
+const source2 = { c: 3 };
+
+Object.assign(target, source1, source2);
+target // {a:1, b:2, c:3}
+```
+
+#### 基本用法
+
+1.如果目标对象与源对象有同名属性，或多个源对象有同名属性，则后面的属性会覆盖前面的属性。
+
+```js
+const target = { a: 1, b: 1 };
+
+const source1 = { b: 2, c: 2 };
+const source2 = { c: 3 };
+
+Object.assign(target, source1, source2);
+target // {a:1, b:2, c:3}
+```
+
+2.如果只有一个参数，`Object.assign()`会直接返回该参数。
+
+```js
+const obj = {a: 1};
+Object.assign(obj); // {a: 1}
+Object.assign(obj) === obj // true
+```
+
+3.如果该参数不是对象，则会先转成对象，然后返回。
+
+```js
+Object.assign(2); // Number {2}
+typeof Object.assign(2); // "object"
+```
+
+4.由于`undefined`和`null`无法转成对象，若它们作为首参数，就会报错。
+
+```js
+Object.assign(undefined);
+Object.assign(null);
+// Uncaught TypeError: Cannot convert undefined or null to object
+```
+
+5.若非对象参数出现在源对象的位置（即非首参数），首先，这些参数都会转成对象，如果无法转成对象，就会跳过。
+
+* 如果`undefined`和`null`不在首参数，就不会报错。
+* 其他类型的值（即数值、字符串和布尔值）不在首参数，也不会报错。但字符串会以数组形式，拷贝入目标对象，其他值都不会产生效果。
+
+```js
+const targetObj = {a: 1};
+
+// undefined、null
+Object.assign(targetObj, undefined) === targetObj; // true
+Object.assign(targetObj, null) === targetObj; // true
+
+// 数值、布尔值等
+Object.assign(targetObj, 10); // {a: 1}
+Object.assign(targetObj, true); // {a: 1}
+
+// 字符串
+Object.assign(targetObj, 'foo'); // {0: "f", 1: "o", 2: "o", a: 1}
+```
+
+如下代码所示，布尔值、数值、字符串会分别转成对应的包装对象，它们的原始值都在包装对象的内部属性`[[PrimitiveValue]]`上面，这个属性是不会被`Object.assign()`拷贝的。只有字符串的包装对象，会产生可枚举的实义属性，那些属性则会被拷贝。
+
+```js
+Object(true) // {[[PrimitiveValue]]: true}
+Object(10)  //  {[[PrimitiveValue]]: 10}
+Object('abc') // {0: "a", 1: "b", 2: "c", length: 3, [[PrimitiveValue]]: "abc"}
+```
+
+6.`Object.assign()`拷贝的属性是有限制的，只拷贝源对象的自身属性（不拷贝继承属性），也不拷贝不可枚举的属性（`enumerable: false`）。
+
+```js
+Object.assign({b: 'c'},
+  Object.defineProperty({}, 'invisible', {
+    enumerable: false,
+    value: 'hello'
+  })
+);
+// { b: 'c' }
+```
+
+上述代码中，`Object.assign()`要拷贝的对象只有一个不可枚举属性`invisible`，这个属性并没有被拷贝进去。
+
+7.属性名为 Symbol 值的属性，也会被`Object.assign()`拷贝。
+
+```js
+Object.assign({ a: 'b' }, { [Symbol('c')]: 'd' }); // { a: 'b', Symbol(c): 'd' }
+```
+
+> **注意点**
+>
+> (1)浅拷贝
+>
+> `Object.assign()`方法实行的是浅拷贝，而不是深拷贝。如果源对象某个属性的值是对象，那么目标对象拷贝得到的是这个对象的引用。
+>
+> ```js
+> const obj1 = {a: {b: 1}};
+> const obj2 = Object.assign({}, obj1);
+> 
+> obj1.a.b = 2;
+> obj2.a.b // 2
+> ```
+>
+> (2)同名属性的替换 ⭐️
+>
+> 对于嵌套的对象，一旦遇到同名属性，`Object.assign()`将会替换，而不是添加。
+>
+> ```js
+> const target = { a: { b: 'c', d: 'e' } }
+> const source = { a: { b: 'hello' } }
+> Object.assign(target, source); // { a: { b: 'hello' } }
+> ```
+>
+> (3)数组的处理
+>
+> `Object.assign()`可以用来处理数组，但是会把数组视为对象。最终得到的结果话是数组。
+>
+> ```js
+> Object.assign([1, 2, 3], [4, 5]); // [4, 5, 3]
+> ```
+>
+> `Object.assign()`把数组视为属性名为 0、1、2 的对象，因此源数组的 0 号属性`4`覆盖了目标数组的 0 号属性`1`。
+>
+> (4)取值函数的处理 ⭐️ ？
+>
+> `Object.assign()`只能进行值的复制，如果要复制的值是一个取值函数，那么将求值后再复制。
+>
+> ```js
+> const source = {
+>   get foo() { return 1 }
+> };
+> const target = {};
+> 
+> Object.assign(target, source); // { foo: 1 }
+> ```
+>
+> 
+
+#### 常见用途
+
+1.为对象添加属性
+
+```js
+class Point {
+  constructor(x, y) {
+    // 将x属性和y属性添加到Point类的对象实例
+    Object.assign(this, {x, y}); 
+  }
+}
+```
+
+2.为对象添加方法
+
+```js
+Object.assign(SomeClass.prototype, {
+  someMethod(arg1, arg2) {
+    ···
+  },
+  anotherMethod() {
+    ···
+  }
+});
+
+// 等同于
+SomeClass.prototype.someMethod = function (arg1, arg2) {
+  ···
+};
+SomeClass.prototype.anotherMethod = function () {
+  ···
+};
+```
+
+3.克隆对象
+
+```js
+function clone(origin) {
+  return Object.assign({}, origin);
+}
+```
+
+上述方法只能克隆原始对象自身的值，不能克隆它继承的值。如果想要保持继承链，可以采用下面的代码。
+
+```js
+function clone(origin) {
+  let originProto = Object.getPrototypeOf(origin);
+  return Object.assign(Object.create(originProto), origin);
+}
+```
+
+4.合并多个对象
+
+将多个对象合并到某个对象。
+
+```js
+const merge =
+  (target, ...sources) => Object.assign(target, ...sources);
+```
+
+合并后返回一个新对象。
+
+```js
+const merge =
+  (...sources) => Object.assign({}, ...sources);
+```
+
+5.为属性指定默认值
+
+```js
+const DEFAULTS = {
+  logLevel: 0,
+  outputFormat: 'html'
+};
+
+function processContent(options) {
+  options = Object.assign({}, DEFAULTS, options);
+  console.log(options);
+  // ...
+}
+
+processContent({name: 'ramona'});
+```
+
+注意点：浅拷贝的问题，对象中不要嵌套对象。
+
+## Object.getOwnPropertyDescriptors()
+
+**作用**
+
+* `Object.getOwnPropertyDescriptor()`方法：会返回某个对象属性的描述对象（descriptor）。（ES5）
+* `Object.getOwnPropertyDescriptors()`方法：返回指定对象所有自身属性（非继承属性）的描述对象。（ES2017）
+
+```js
+const obj = {
+  foo: 123,
+  get bar() { return 'abc' }
+};
+
+Object.getOwnPropertyDescriptor(obj11, 'foo');
+// { value: 123, writable: true, enumerable: true,  configurable: true }
+
+Object.getOwnPropertyDescriptors(obj);
+/**
+{
+  bar: {
+    configurable: true,
+    enumerable: true,
+    get: [Function: get bar],
+    set: undefined
+  },
+  foo: {
+  	configurable: true,
+    enumerable: true,
+    value: 123,
+    writable: true
+  }
+}
+*/
+```
+
+`Object.getOwnPropertyDescriptors()`方法的实现。
+
+```js
+function getOwnPropertyDescriptors(obj) {
+  const result = {};
+  for (let key of Reflect.ownKeys(obj)) {
+    result[key] = Object.getOwnPropertyDescriptor(obj, key);
+  }
+  return result;
+}
+```
+
+**用途**
+
+1.该方法为了解决`Object.assign()`无法正确拷贝`get`属性和`set`属性的问题。
+
+```js
+const source1 = {
+  set foo(value) {
+    console.log(value);
+  }
+};
+
+const target1 = {};
+Object.assign(target1, source1); // {foo: undefined}
+Object.getOwnPropertyDescriptor(target1, 'foo');
+// { value: undefined, writable: true, enumerable: true, configurable: true }
+```
+
+`source1`对象的`foo`属性的值是一个赋值函数,`Object.assign`方法总是拷贝一个属性的值，而不会拷贝它背后的赋值方法或取值方法,导致该属性的值变成了`undefined`。
+
+当使用`Object.getOwnPropertyDescriptors()`方法配合`Object.defineProperties()`方法，就可以实现正确拷贝。
+
+```js
+const source2 = {
+  set foo(value) {
+    console.log(value);
+  }
+};
+const target2 = {};
+
+Object.defineProperties(target2, Object.getOwnPropertyDescriptors(source2));
+Object.getOwnPropertyDescriptor(target2, 'foo');
+// { get: undefined, set: [Function: set foo], enumerable: true, configurable: true }
+
+// 等同于
+const shallowMerge = (target, source) => Object.defineProperties(
+  target,
+  Object.getOwnPropertyDescriptors(source)
+);
+Object.getOwnPropertyDescriptor(shallowMerge(target2, source2), 'foo');
+```
+
+2.配合`Object.create()`方法，将对象属性克隆到一个新对象。这属于浅拷贝。
+
+```js
+const clone = Object.create(Object.getPrototypeOf(obj),
+  Object.getOwnPropertyDescriptors(obj));
+
+// 或者
+
+const shallowClone = (obj) => Object.create(
+  Object.getPrototypeOf(obj),
+  Object.getOwnPropertyDescriptors(obj)
+);
+```
+
+3.实现一个对象继承另一个对象。
+
+```js
+// ES6 之前继承对象写法
+const obj = {
+  __proto__: prot,
+  foo: 123,
+};
+
+// ES6 规定__proto__只有浏览器要部署，其他环境不用部署
+const obj = Object.create(prot);
+obj.foo = 123;
+
+// 或者
+const obj = Object.assign(Object.create(prot),{foo: 123});
+
+// 使用Object.getOwnPropertyDescriptors()
+const obj = Object.create(
+  prot,
+  Object.getOwnPropertyDescriptors({
+    foo: 123,
+  })
+);
+```
+
+4.实现 Mixin（混入）模式。
+
+```js
+let mix = (object) => ({
+  with: (...mixins) => mixins.reduce(
+    (c, mixin) => Object.create(
+      c, Object.getOwnPropertyDescriptors(mixin)
+    ), object)
+});
+
+// multiple mixins example
+let a = {a: 'a'};
+let b = {b: 'b'};
+let c = {c: 'c'};
+let d = mix(c).with(a, b);
+
+d.c // "c"
+d.b // "b"
+d.a // "a"
+```
+
 ## `for-of`和`for-in`的区别
 
 #### 1、`for-of`
