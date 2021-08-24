@@ -1941,150 +1941,6 @@ const person = {
 
 person.sayName.name;   // "sayName"
 ```
-
-<<<<<<< HEAD
-## 对象的新增方法
-
-### Object.is() 比较两个值是否相等
-
-
-
-ES5 中比较两个值是否相等，只有两个运算符。
-
-* 相等运算符（`==`），但会自动转换数据类型。
-* 严格相等运算符（`===`），但`NaN`不等于自身，以及`+0`等于`-0`。
-
-ES6 提出“Same-value equality”（同值相等）算法，即`Object.is`方法，用来比较两个值是否严格想等，与（`===`）行为基本一致。但是`+0`不等于`-0`，`NaN`等于自身。
-
-```js
-Object.is('foo', 'foo'); // true
-Object.is({}, {}); // false  ? 
-
-+0 === -0 //true
-NaN === NaN // false
-
-Object.is(+0, -0) // false
-Object.is(NaN, NaN) // true
-```
-
-ES5可通过以下代码，部署`Object.is`。
-
-```js
-Object.defineProperty(Object, 'is', {
-  value: function(x, y) {
-    if (x === y) {
-      // 针对 +0 不等于 -0 的情况,返回 false
-      return x !== 0 || 1 / x === 1 / y;
-    }
-    // 针对 NaN 的情况
-    return x !== x && y !== y;
-  },
-  configurable: true,
-  enumerable: false;
-  writable: true
-});
-```
-
-### Object.assign() 对象的合并
-
-**作用**：将源对象（source）的所有可枚举属性，复制到目标对象（target）。
-
-**语法**：`Object.assign(target, source, ...)`方法的第一个参数是目标对象，后面的参数都是源对象。
-
-```js
-const target = { a: 1 };
-
-const source1 = { b: 2 };
-const source2 = { c: 3 };
-
-Object.assign(target, source1, source2);
-target // {a:1, b:2, c:3}
-```
-
-#### 基本用法
-
-1.如果目标对象与源对象有同名属性，或多个源对象有同名属性，则后面的属性会覆盖前面的属性。
-
-```js
-const target = { a: 1, b: 1 };
-
-const source1 = { b: 2, c: 2 };
-const source2 = { c: 3 };
-
-Object.assign(target, source1, source2);
-target // {a:1, b:2, c:3}
-```
-
-2.如果只有一个参数，`Object.assign()`会直接返回该参数。
-
-```js
-const obj = {a: 1};
-Object.assign(obj); // {a: 1}
-Object.assign(obj) === obj // true
-```
-
-3.如果该参数不是对象，则会先转成对象，然后返回。
-
-```js
-Object.assign(2); // Number {2}
-typeof Object.assign(2); // "object"
-```
-
-4.由于`undefined`和`null`无法转成对象，若它们作为首参数，就会报错。
-
-```js
-Object.assign(undefined);
-Object.assign(null);
-// Uncaught TypeError: Cannot convert undefined or null to object
-```
-
-5.若非对象参数出现在源对象的位置（即非首参数），首先，这些参数都会转成对象，如果无法转成对象，就会跳过。
-
-* 如果`undefined`和`null`不在首参数，就不会报错。
-* 其他类型的值（即数值、字符串和布尔值）不在首参数，也不会报错。但字符串会以数组形式，拷贝入目标对象，其他值都不会产生效果。
-
-```js
-const targetObj = {a: 1};
-
-// undefined、null
-Object.assign(targetObj, undefined) === targetObj; // true
-Object.assign(targetObj, null) === targetObj; // true
-
-// 数值、布尔值等
-Object.assign(targetObj, 10); // {a: 1}
-Object.assign(targetObj, true); // {a: 1}
-
-// 字符串
-Object.assign(targetObj, 'foo'); // {0: "f", 1: "o", 2: "o", a: 1}
-```
-
-如下代码所示，布尔值、数值、字符串会分别转成对应的包装对象，它们的原始值都在包装对象的内部属性`[[PrimitiveValue]]`上面，这个属性是不会被`Object.assign()`拷贝的。只有字符串的包装对象，会产生可枚举的实义属性，那些属性则会被拷贝。
-
-```js
-Object(true) // {[[PrimitiveValue]]: true}
-Object(10)  //  {[[PrimitiveValue]]: 10}
-Object('abc') // {0: "a", 1: "b", 2: "c", length: 3, [[PrimitiveValue]]: "abc"}
-```
-
-6.`Object.assign()`拷贝的属性是有限制的，只拷贝源对象的自身属性（不拷贝继承属性），也不拷贝不可枚举的属性（`enumerable: false`）。
-
-```js
-Object.assign({b: 'c'},
-  Object.defineProperty({}, 'invisible', {
-    enumerable: false,
-    value: 'hello'
-  })
-);
-// { b: 'c' }
-```
-
-上述代码中，`Object.assign()`要拷贝的对象只有一个不可枚举属性`invisible`，这个属性并没有被拷贝进去。
-
-7.属性名为 Symbol 值的属性，也会被`Object.assign()`拷贝。
-
-```js
-Object.assign({ a: 'b' }, { [Symbol('c')]: 'd' }); // { a: 'b', Symbol(c): 'd' }
-=======
 如果对象的方法使用了取值函数（`getter`）和存值函数（`setter`），则`name`属性不是在该方法上面，而是该方法的属性的描述对象的`get`和`set`属性上面，返回值是方法名前加上`get`和`set`。
 
 ```js
@@ -2283,56 +2139,8 @@ let { x, y, ...z } = { x: 1, y: 2, a: 3, b: 4 };
 x // 1
 y // 2
 z // { a: 3, b: 4 }
->>>>>>> 10d184d5453f6075f3ffc1c49b19a7be4265e6a3
 ```
 
-> **注意点**
->
-<<<<<<< HEAD
-> (1)浅拷贝
->
-> `Object.assign()`方法实行的是浅拷贝，而不是深拷贝。如果源对象某个属性的值是对象，那么目标对象拷贝得到的是这个对象的引用。
->
-> ```js
-> const obj1 = {a: {b: 1}};
-> const obj2 = Object.assign({}, obj1);
-> 
-> obj1.a.b = 2;
-> obj2.a.b // 2
-> ```
->
-> (2)同名属性的替换 ⭐️
->
-> 对于嵌套的对象，一旦遇到同名属性，`Object.assign()`将会替换，而不是添加。
->
-> ```js
-> const target = { a: { b: 'c', d: 'e' } }
-> const source = { a: { b: 'hello' } }
-> Object.assign(target, source); // { a: { b: 'hello' } }
-> ```
->
-> (3)数组的处理
->
-> `Object.assign()`可以用来处理数组，但是会把数组视为对象。最终得到的结果话是数组。
->
-> ```js
-> Object.assign([1, 2, 3], [4, 5]); // [4, 5, 3]
-> ```
->
-> `Object.assign()`把数组视为属性名为 0、1、2 的对象，因此源数组的 0 号属性`4`覆盖了目标数组的 0 号属性`1`。
->
-> (4)取值函数的处理 ⭐️ ？
->
-> `Object.assign()`只能进行值的复制，如果要复制的值是一个取值函数，那么将求值后再复制。
->
-> ```js
-> const source = {
->   get foo() { return 1 }
-> };
-> const target = {};
-> 
-> Object.assign(target, source); // { foo: 1 }
-=======
 > 1.由于解构赋值要求等号右边是一个对象，所以如果等号右边是`undefined`或`null`，就会报错，因为它们无法转为对象。
 >
 > ```js
@@ -2386,12 +2194,379 @@ z // { a: 3, b: 4 }
 > ```js
 > let { x, ...{ y, z } } = o;
 > // Uncaught SyntaxError: `...` must be followed by an identifier in declaration contexts
->>>>>>> 10d184d5453f6075f3ffc1c49b19a7be4265e6a3
+> ```
+>
+> 
+##### 应用
+
+扩展某个函数的参数，引入其他操作。
+
+```js
+function baseFunction({ a, b }) {
+  // ...
+}
+function wrapperFunction({ x, y, ...restConfig }) {
+  // 使用 x 和 y 参数进行操作
+  // 其余参数传给原始函数
+  return baseFunction(restConfig);
+}
+```
+
+原始函数`baseFunction`接受`a`和`b`作为参数，函数`wrapperFunction`在`baseFunction`的基础上进行了扩展，能够接受多余的参数，并且保留原始函数的行为。(有点像Java中面向对象中的代理？)
+
+#### 扩展运算符
+
+1.对象的扩展运算符（`...`）用于取出参数对象的所有可遍历属性，拷贝到当前对象之中。
+
+```js
+let z = { a: 3, b: 4 };
+let n = { ...z };
+n // { a: 3, b: 4 }
+```
+
+> **注意点**
+>
+> (1).扩展运算符后面是数组，可获得对象（数组是特殊的对象）。
+>
+> ```js
+> let foo = { ...['a', 'b', 'c'] };
+> foo // {0: "a", 1: "b", 2: "c"}
+> ```
+>
+> (2)扩展运算符后面是一个空对象，则没有任何效果。
+>
+> ```js
+> {...{}, a: 1} // { a: 1 }
+> ```
+>
+> (3)扩展运算符后面不是对象，则会自动将其转为对象。
+>
+> ```JS
+> // 运算符后面的 value 是数字、布尔值、undefined、null，等同于 {...Object(value)}，返回空对象
+> {...1} // {} 
+> {...true} // {}
+> {...undefined} // {}
+> {...null} // {}
+> 
+> 
+> // 运算符后面的 value 是字符串，会自动转成一个类似数组的对象
+> {...'hello'} // {0: "h", 1: "e", 2: "l", 3: "l", 4: "o"}
 > ```
 >
 > 
 
-<<<<<<< HEAD
+2.对象的扩展运算符等同于使用`Object.assign()`方法。
+
+```js
+const a = {x: 1, y: 2};
+let aClone = { ...a };
+// 等同于
+let aClone = Object.assign({}, a);
+```
+
+上例只是拷贝了对象实例的属性，如果想完整克隆一个对象，还拷贝对象原型的属性，可以采用下面的写法。
+
+```js
+let testObj = {x: 1, y: 2};
+const p = {
+  foo: 'foo', 
+  find() { 
+    return this.foo; 
+  }
+};
+Object.setPrototypeOf(testObj, p);
+testObj.__proto__; // {foo: "foo", find: ƒ}
+
+// 写法一
+const clone1 = {
+  __proto__: Object.getPrototypeOf(testObj),
+  ...testObj
+};
+clone1 // {_proto_: {…}, x: 1, y: 2}
+
+// 写法二
+const clone2 = Object.assign(
+  Object.create(Object.getPrototypeOf(testObj)),
+  testObj
+);
+
+// 写法三
+const clone3 = Object.create(
+  Object.getPrototypeOf(testObj),
+  Object.getOwnPropertyDescriptors(testObj)
+)
+```
+
+写法一的`__proto__`属性在非浏览器的环境不一定部署，因此推荐使用写法二和写法三。
+
+3.扩展运算符可以用于合并两个对象。
+
+```javascript
+const aObj = {x: 1};
+const bObj = {y: 2};
+let ab = { ...aObj, ...bObj };
+// 等同于
+let ab = Object.assign({}, aObj, bObj);
+```
+
+4.如果用户自定义的属性，放在扩展运算符后面，则扩展运算符内部的同名属性会被覆盖掉。
+
+```js
+const a = {x: 3};
+let aWithOverrides = { ...a, x: 1, y: 2 }; // {x: 1, y: 2} 
+// 等同于
+let aWithOverrides = { ...a, ...{ x: 1, y: 2 } };
+// 等同于
+let x = 1, y = 2, aWithOverrides = { ...a, x, y };
+// 等同于
+let aWithOverrides = Object.assign({}, a, { x: 1, y: 2 });
+```
+
+可应用于修改现有对象部分的属性。
+
+```js
+const previousVersion = {
+  name: 'old name',
+  age: 18
+}
+let newVersion = {
+  ...previousVersion,
+  name: 'new name' // Override the name property
+};
+// {name: "New Name", age: 18}
+```
+
+5.如果把自定义属性放在扩展运算符前面，就变成了设置新对象的默认属性值。
+
+```js
+const a = {x: 3};
+let aWithDefaults = { x: 1, y: 2, ...a }; // {x: 3, y: 2}
+// 等同于
+let aWithDefaults = Object.assign({}, { x: 1, y: 2 }, a);
+// 等同于
+let aWithDefaults = Object.assign({ x: 1, y: 2 }, a);
+
+```
+
+6.与数组的扩展运算符一样，对象的扩展运算符后面可以跟表达式。
+
+```js
+const d = 2;
+const obj = {
+  ...(d > 1 ? {a: 1} : {}),
+  b: 2,
+};
+// {a: 1, b: 2}
+```
+
+7.扩展运算符的参数对象之中，如果有取值函数`get`，这个函数是会执行的。
+
+```js
+let paramObj = {
+  get x() {
+    throw new Error('not throw yet');
+  }
+}
+
+let paramObj1 = {
+  get x() {
+    return 'hello';
+  }
+}
+
+let aWithXGetter = { ...paramObj }; // Uncaught Error: not throw yet at Object.get x [as x]
+let aWithXGetter1 = { ...paramObj1 }; // {x: 'hello'}
+```
+
+取值函数`get`在扩展`a`对象时会自动执行，导致报错。
+
+## 对象的新增方法
+
+### Object.is() 比较两个值是否相等
+
+ES5 中比较两个值是否相等，只有两个运算符。
+
+* 相等运算符（`==`），但会自动转换数据类型。
+* 严格相等运算符（`===`），但`NaN`不等于自身，以及`+0`等于`-0`。
+
+ES6 提出“Same-value equality”（同值相等）算法，即`Object.is`方法，用来比较两个值是否严格想等，与（`===`）行为基本一致。但是`+0`不等于`-0`，`NaN`等于自身。
+
+```js
+Object.is('foo', 'foo'); // true
+Object.is({}, {}); // false  ? 
+
++0 === -0 //true
+NaN === NaN // false
+
+Object.is(+0, -0) // false
+Object.is(NaN, NaN) // true
+```
+
+ES5可通过以下代码，部署`Object.is`。
+
+```js
+Object.defineProperty(Object, 'is', {
+  value: function(x, y) {
+    if (x === y) {
+      // 针对 +0 不等于 -0 的情况,返回 false
+      return x !== 0 || 1 / x === 1 / y;
+    }
+    // 针对 NaN 的情况
+    return x !== x && y !== y;
+  },
+  configurable: true,
+  enumerable: false;
+  writable: true
+});
+```
+
+### Object.assign() 对象的合并
+
+**作用**：将源对象（source）的所有可枚举属性，复制到目标对象（target）。
+
+**语法**：`Object.assign(target, source, ...)`方法的第一个参数是目标对象，后面的参数都是源对象。
+
+```js
+const target = { a: 1 };
+
+const source1 = { b: 2 };
+const source2 = { c: 3 };
+
+Object.assign(target, source1, source2);
+target // {a:1, b:2, c:3}
+```
+
+#### 基本用法
+
+1.如果目标对象与源对象有同名属性，或多个源对象有同名属性，则后面的属性会覆盖前面的属性。
+
+```js
+const target = { a: 1, b: 1 };
+
+const source1 = { b: 2, c: 2 };
+const source2 = { c: 3 };
+
+Object.assign(target, source1, source2);
+target // {a:1, b:2, c:3}
+```
+
+2.如果只有一个参数，`Object.assign()`会直接返回该参数。
+
+```js
+const obj = {a: 1};
+Object.assign(obj); // {a: 1}
+Object.assign(obj) === obj // true
+```
+
+3.如果该参数不是对象，则会先转成对象，然后返回。
+
+```js
+Object.assign(2); // Number {2}
+typeof Object.assign(2); // "object"
+```
+
+4.由于`undefined`和`null`无法转成对象，若它们作为首参数，就会报错。
+
+```js
+Object.assign(undefined);
+Object.assign(null);
+// Uncaught TypeError: Cannot convert undefined or null to object
+```
+
+5.若非对象参数出现在源对象的位置（即非首参数），首先，这些参数都会转成对象，如果无法转成对象，就会跳过。
+
+* 如果`undefined`和`null`不在首参数，就不会报错。
+* 其他类型的值（即数值、字符串和布尔值）不在首参数，也不会报错。但字符串会以数组形式，拷贝入目标对象，其他值都不会产生效果。
+
+```js
+const targetObj = {a: 1};
+
+// undefined、null
+Object.assign(targetObj, undefined) === targetObj; // true
+Object.assign(targetObj, null) === targetObj; // true
+
+// 数值、布尔值等
+Object.assign(targetObj, 10); // {a: 1}
+Object.assign(targetObj, true); // {a: 1}
+
+// 字符串
+Object.assign(targetObj, 'foo'); // {0: "f", 1: "o", 2: "o", a: 1}
+```
+
+如下代码所示，布尔值、数值、字符串会分别转成对应的包装对象，它们的原始值都在包装对象的内部属性`[[PrimitiveValue]]`上面，这个属性是不会被`Object.assign()`拷贝的。只有字符串的包装对象，会产生可枚举的实义属性，那些属性则会被拷贝。
+
+```js
+Object(true) // {[[PrimitiveValue]]: true}
+Object(10)  //  {[[PrimitiveValue]]: 10}
+Object('abc') // {0: "a", 1: "b", 2: "c", length: 3, [[PrimitiveValue]]: "abc"}
+```
+
+6.`Object.assign()`拷贝的属性是有限制的，只拷贝源对象的自身属性（不拷贝继承属性），也不拷贝不可枚举的属性（`enumerable: false`）。
+
+```js
+Object.assign({b: 'c'},
+  Object.defineProperty({}, 'invisible', {
+    enumerable: false,
+    value: 'hello'
+  })
+);
+// { b: 'c' }
+```
+
+上述代码中，`Object.assign()`要拷贝的对象只有一个不可枚举属性`invisible`，这个属性并没有被拷贝进去。
+
+7.属性名为 Symbol 值的属性，也会被`Object.assign()`拷贝。
+
+```js
+Object.assign({ a: 'b' }, { [Symbol('c')]: 'd' }); // { a: 'b', Symbol(c): 'd' }
+```
+
+> **注意点**
+>
+> (1)浅拷贝
+>
+> `Object.assign()`方法实行的是浅拷贝，而不是深拷贝。如果源对象某个属性的值是对象，那么目标对象拷贝得到的是这个对象的引用。
+>
+> ```js
+> const obj1 = {a: {b: 1}};
+> const obj2 = Object.assign({}, obj1);
+> 
+> obj1.a.b = 2;
+> obj2.a.b // 2
+> ```
+>
+> (2)同名属性的替换 ⭐️
+>
+> 对于嵌套的对象，一旦遇到同名属性，`Object.assign()`将会替换，而不是添加。
+>
+> ```js
+> const target = { a: { b: 'c', d: 'e' } }
+> const source = { a: { b: 'hello' } }
+> Object.assign(target, source); // { a: { b: 'hello' } }
+> ```
+>
+> (3)数组的处理
+>
+> `Object.assign()`可以用来处理数组，但是会把数组视为对象。最终得到的结果话是数组。
+>
+> ```js
+> Object.assign([1, 2, 3], [4, 5]); // [4, 5, 3]
+> ```
+>
+> `Object.assign()`把数组视为属性名为 0、1、2 的对象，因此源数组的 0 号属性`4`覆盖了目标数组的 0 号属性`1`。
+>
+> (4)取值函数的处理 ⭐️ ？
+>
+> `Object.assign()`只能进行值的复制，如果要复制的值是一个取值函数，那么将求值后再复制。
+>
+> ```js
+> const source = {
+>   get foo() { return 1 }
+> };
+> const target = {};
+> 
+> Object.assign(target, source); // { foo: 1 }
+
 #### 常见用途
 
 1.为对象添加属性
@@ -2625,7 +2800,7 @@ d.c // "c"
 d.b // "b"
 d.a // "a"
 ```
-### `__proto__	`属性，Object.setPrototypeOf()，Object.getPrototypeOf() 
+### `__proto__`属性，Object.setPrototypeOf()，Object.getPrototypeOf() 
 
 #### `__proto__`属性
 
@@ -2779,193 +2954,6 @@ Object.getPrototypeOf(rec) === Rectangle.prototype; // false
 > // TypeError: Cannot convert undefined or null to object
 > ```
 >
-> 
-=======
-##### 应用
-
-扩展某个函数的参数，引入其他操作。
-
-```js
-function baseFunction({ a, b }) {
-  // ...
-}
-function wrapperFunction({ x, y, ...restConfig }) {
-  // 使用 x 和 y 参数进行操作
-  // 其余参数传给原始函数
-  return baseFunction(restConfig);
-}
-```
-
-原始函数`baseFunction`接受`a`和`b`作为参数，函数`wrapperFunction`在`baseFunction`的基础上进行了扩展，能够接受多余的参数，并且保留原始函数的行为。(有点像Java中面向对象中的代理？)
-
-#### 扩展运算符
-
-1.对象的扩展运算符（`...`）用于取出参数对象的所有可遍历属性，拷贝到当前对象之中。
-
-```js
-let z = { a: 3, b: 4 };
-let n = { ...z };
-n // { a: 3, b: 4 }
-```
-
-> **注意点**
->
-> (1).扩展运算符后面是数组，可获得对象（数组是特殊的对象）。
->
-> ```js
-> let foo = { ...['a', 'b', 'c'] };
-> foo // {0: "a", 1: "b", 2: "c"}
-> ```
->
-> (2)扩展运算符后面是一个空对象，则没有任何效果。
->
-> ```js
-> {...{}, a: 1} // { a: 1 }
-> ```
->
-> (3)扩展运算符后面不是对象，则会自动将其转为对象。
->
-> ```JS
-> // 运算符后面的 value 是数字、布尔值、undefined、null，等同于 {...Object(value)}，返回空对象
-> {...1} // {} 
-> {...true} // {}
-> {...undefined} // {}
-> {...null} // {}
-> 
-> 
-> // 运算符后面的 value 是字符串，会自动转成一个类似数组的对象
-> {...'hello'} // {0: "h", 1: "e", 2: "l", 3: "l", 4: "o"}
-> ```
->
-> 
-
-2.对象的扩展运算符等同于使用`Object.assign()`方法。
-
-```js
-const a = {x: 1, y: 2};
-let aClone = { ...a };
-// 等同于
-let aClone = Object.assign({}, a);
-```
-
-上例只是拷贝了对象实例的属性，如果想完整克隆一个对象，还拷贝对象原型的属性，可以采用下面的写法。
-
-```js
-let testObj = {x: 1, y: 2};
-const p = {
-  foo: 'foo', 
-  find() { 
-    return this.foo; 
-  }
-};
-Object.setPrototypeOf(testObj, p);
-testObj.__proto__; // {foo: "foo", find: ƒ}
-
-// 写法一
-const clone1 = {
-  __proto__: Object.getPrototypeOf(testObj),
-  ...testObj
-};
-clone1 // {_proto_: {…}, x: 1, y: 2}
-
-// 写法二
-const clone2 = Object.assign(
-  Object.create(Object.getPrototypeOf(testObj)),
-  testObj
-);
-
-// 写法三
-const clone3 = Object.create(
-  Object.getPrototypeOf(testObj),
-  Object.getOwnPropertyDescriptors(testObj)
-)
-```
-
-写法一的`__proto__`属性在非浏览器的环境不一定部署，因此推荐使用写法二和写法三。
-
-3.扩展运算符可以用于合并两个对象。
-
-```javascript
-const aObj = {x: 1};
-const bObj = {y: 2};
-let ab = { ...aObj, ...bObj };
-// 等同于
-let ab = Object.assign({}, aObj, bObj);
-```
-
-4.如果用户自定义的属性，放在扩展运算符后面，则扩展运算符内部的同名属性会被覆盖掉。
-
-```js
-const a = {x: 3};
-let aWithOverrides = { ...a, x: 1, y: 2 }; // {x: 1, y: 2} 
-// 等同于
-let aWithOverrides = { ...a, ...{ x: 1, y: 2 } };
-// 等同于
-let x = 1, y = 2, aWithOverrides = { ...a, x, y };
-// 等同于
-let aWithOverrides = Object.assign({}, a, { x: 1, y: 2 });
-```
-
-可应用于修改现有对象部分的属性。
-
-```js
-const previousVersion = {
-  name: 'old name',
-  age: 18
-}
-let newVersion = {
-  ...previousVersion,
-  name: 'new name' // Override the name property
-};
-// {name: "New Name", age: 18}
-```
-
-5.如果把自定义属性放在扩展运算符前面，就变成了设置新对象的默认属性值。
-
-```js
-const a = {x: 3};
-let aWithDefaults = { x: 1, y: 2, ...a }; // {x: 3, y: 2}
-// 等同于
-let aWithDefaults = Object.assign({}, { x: 1, y: 2 }, a);
-// 等同于
-let aWithDefaults = Object.assign({ x: 1, y: 2 }, a);
-
-```
-
-6.与数组的扩展运算符一样，对象的扩展运算符后面可以跟表达式。
-
-```js
-const d = 2;
-const obj = {
-  ...(d > 1 ? {a: 1} : {}),
-  b: 2,
-};
-// {a: 1, b: 2}
-```
-
-7.扩展运算符的参数对象之中，如果有取值函数`get`，这个函数是会执行的。
-
-```js
-let paramObj = {
-  get x() {
-    throw new Error('not throw yet');
-  }
-}
-
-let paramObj1 = {
-  get x() {
-    return 'hello';
-  }
-}
-
-let aWithXGetter = { ...paramObj }; // Uncaught Error: not throw yet at Object.get x [as x]
-let aWithXGetter1 = { ...paramObj1 }; // {x: 'hello'}
-```
-
-取值函数`get`在扩展`a`对象时会自动执行，导致报错。
-
-
->>>>>>> 10d184d5453f6075f3ffc1c49b19a7be4265e6a3
 
 ### Object.keys()，Object.values()，Object.entries()
 
