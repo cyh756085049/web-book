@@ -2967,6 +2967,170 @@ let aWithXGetter1 = { ...paramObj1 }; // {x: 'hello'}
 
 >>>>>>> 10d184d5453f6075f3ffc1c49b19a7be4265e6a3
 
+### Object.keys()，Object.values()，Object.entries()
+
+#### Object.keys() (ES5)
+
+返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键名。
+
+```js
+var obj = { foo: 'bar', baz: 42 };
+Object.keys(obj); // ["foo", "baz"]
+```
+
+ES2017 [引入](https://github.com/tc39/proposal-object-values-entries)了跟`Object.keys`配套的`Object.values`和`Object.entries`，作为遍历一个对象的补充手段，供`for...of`循环使用。
+
+```js
+let {keys, values, entries} = Object;
+let obj = { a: 1, b: 2, c: 3 };
+
+for (let key of keys(obj)) {
+  console.log(key); // 'a', 'b', 'c'
+}
+
+for (let value of values(obj)) {
+  console.log(value); // 1, 2, 3
+}
+
+for (let [key, value] of entries(obj)) {
+  console.log([key, value]); // ['a', 1], ['b', 2], ['c', 3]
+}
+```
+
+#### Object.values()
+
+返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键值。
+
+```js
+const obj = { 100: 'a', 2: 'b', 7: 'c' };
+Object.values(obj); // ["b", "c", "a"]
+```
+
+`Object.values`只返回对象自身的可遍历属性。
+
+```js
+const obj = Object.create({}, {p: {value: 42}});
+Object.values(obj); // []
+```
+
+上面代码中，`Object.create`方法的第二个参数添加的对象属性（属性`p`），如果不显式声明，默认是不可遍历的，因为`p`的属性描述对象的`enumerable`默认是`false`，`Object.values`不会返回这个属性。只要把`enumerable`改成`true`，`Object.values`就会返回属性`p`的值。
+
+```js
+const obj = Object.create({}, {p:
+  {
+    value: 42,
+    enumerable: true
+  }
+});
+Object.values(obj) // [42]
+```
+
+`Object.values`会过滤属性名为 Symbol 值的属性。
+
+```js
+Object.values({ [Symbol()]: 123, foo: 'abc' }); // ['abc']
+```
+
+如果参数不是对象，`Object.values`会先将其转为对象。如果`Object.values`方法的参数是一个字符串，会返回各个字符组成的一个数组。由于数值和布尔值的包装对象，都不会为实例添加非继承的属性。所以，`Object.values`会返回空数组。
+
+```js
+Object.values('foo'); // ['f', 'o', 'o']
+Object.values(42) // []
+Object.values(true) // []
+```
+
+#### Object.entries()
+
+返回一个数组，成员是参数对象自身的（不含继承的）所有可遍历（enumerable）属性的键值对数组。
+
+```js
+const obj = { foo: 'bar', baz: 42 };
+Object.entries(obj); // [ ["foo", "bar"], ["baz", 42] ]
+```
+
+如果原对象的属性名是一个 Symbol 值，该属性会被忽略。
+
+```js
+Object.entries({ [Symbol()]: 123, foo: 'abc' }); // [ [ 'foo', 'abc' ] ]
+```
+
+**用途**
+
+1.遍历对象的属性。
+
+```js
+let obj = { one: 1, two: 2 };
+for (let [k, v] of Object.entries(obj)) {
+  console.log(
+    `${JSON.stringify(k)}: ${JSON.stringify(v)}`
+  );
+}
+// "one": 1
+// "two": 2
+```
+
+2.将对象转为真正的`Map`结构。
+
+```js
+const obj = { foo: 'bar', baz: 42 };
+const map = new Map(Object.entries(obj));
+map // Map { foo: "bar", baz: 42 }
+```
+
+**实现**
+
+```js
+// Generator函数的版本
+function* entries(obj) {
+  for (let key of Object.keys(obj)) {
+    yield [key, obj[key]];
+  }
+}
+
+// 非Generator函数的版本
+function entries(obj) {
+  let arr = [];
+  for (let key of Object.keys(obj)) {
+    arr.push([key, obj[key]]);
+  }
+  return arr;
+}
+```
+
+#### Object.fromEntries()
+
+该方法是`Object.entries()`的逆操作，用于将一个键值对数组转为对象。
+
+```js
+Object.fromEntries([
+  ['foo', 'bar'],
+  ['baz', 42]
+])
+// { foo: "bar", baz: 42 }
+```
+
+该方法可将键值对的数据结构还原为对象，因此特别适合将 Map 结构转为对象。
+
+```js
+// 示例1
+const entries = new Map([
+  ['foo', 'bar'],
+  ['baz', 42]
+]);
+
+Object.fromEntries(entries); // { foo: "bar", baz: 42 }
+
+// 示例2
+const map = new Map().set('foo', true).set('bar', false);
+Object.fromEntries(map); // { foo: true, bar: false }
+```
+
+该方法还可以配合`URLSearchParams`对象，将查询字符串转为对象。
+
+```js
+Object.fromEntries(new URLSearchParams('foo=bar&baz=qux')); // { foo: "bar", baz: "qux" }
+```
+
 ## `for-of`和`for-in`的区别
 
 #### 1、`for-of`
